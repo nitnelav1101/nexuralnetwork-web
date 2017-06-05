@@ -1,4 +1,4 @@
-# neXuralNetwork WEB#
+# neXuralNetwork WEB #
 
 ## Running on Windows ##
 Firstly you need to install the following softwares/dependencies:
