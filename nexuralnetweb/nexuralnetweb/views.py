@@ -1,5 +1,11 @@
+from flask import render_template
 from nexuralnetweb import app
 
 @app.route('/')
-def index():
-    return 'NeXuraNet project is alive!'
+@app.route('/home')
+def home():
+    """Renders the home page."""
+    return render_template(
+        'index.html',
+        title='neXuralNet Project'
+    )
