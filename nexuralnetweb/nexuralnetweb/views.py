@@ -9,3 +9,11 @@ def home():
         'index.html',
         title='neXuralNet Project'
     )
+
+@app.route('/panou')
+def dashboard():
+    """Renders the dashboadr page."""
+    return render_template(
+        'dashboard.html',
+        title='neXuralNet | Panou de control'
+    )

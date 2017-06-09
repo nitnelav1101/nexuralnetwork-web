@@ -1,46 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - Test</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="/static/main.css" />
-    <script src="/static/js/modernizr-2.6.2.js"></script>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/animate.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:600italic,400,800,700,300' rel='stylesheet' type='text/css'>
+    <script src="/static/js/modernizr.js"></script>
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
 </head>
-
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <!-- ====================================================
+    header section -->
+    <header class="top-header">
         <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a href="/" class="navbar-brand">Application name</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('home') }}">Home</a></li>
-                    <li><a href="{{ url_for('about') }}">About</a></li>
-                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                </ul>
+            <div class="row">
+                <!-- nav starts here -->
+                <div class="col-md-12">                 
+                    <nav class="navbar navbar-default">
+                        <div class="container-fluid nav-bar">
+                            <div class="navbar-header">
+                              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                              </button>
+                              <a href="/home"><img src="/static/img/logo.png" alt="" class="img-responsive logo"></a>
+                            </div>
+                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                              <ul class="nav navbar-nav navbar-right">
+                                <li><a href="{{ url_for('home') }}">Acasă</a></li>
+                                <li><a href="#features">Caracteristici</a></li>
+                                <li><a href="#about">Despre proiect</a></li>
+                                <li><a href="" style="color: #FFFF00"><i class="fa fa-tachometer"></i> PANOU DE CONTROL</a></li>
+                              </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
             </div>
         </div>
-    </div>
+    </header><!-- end of header section -->
 
-    <div class="container body-content">
-        {% block content %}{% endblock %}
-        <hr />
-        <footer>
-            <p>&copy; {{ year }} - neXuralNet Project</p>
-        </footer>
-    </div>
+    <!-- content section starts here -->
+    <section class="content">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                   {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </section><!-- end of content section -->
 
-    <!--<script src="/static/js/jquery-1.10.2.js"></script>-->
-    <script src="/static/js/bootstrap.js"></script>
-    {% block scripts %}{% endblock %}
+    <!-- footer starts here -->
+    <footer class="footer text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="icons">
+                        <img src="/static/img/nexural-project.png">
+                        
+                    </div>
+                    <p>COPYRIGHT &copy; 2017 <a href="#"> Un proiect open-source!</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
+    <!-- script tags
+    ============================================================= -->
+    <script src="/static/js/jquery-2.1.1.js"></script>
+    <script src="/static/js/smoothscroll.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script src="/static/js/wow.js"></script>
 </body>
 </html>
