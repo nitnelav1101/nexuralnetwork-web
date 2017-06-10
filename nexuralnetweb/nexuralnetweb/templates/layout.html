@@ -8,7 +8,6 @@
     <title>{{ title }}</title>
     <link rel="stylesheet" href="/static/css/font-awesome.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/animate.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/responsive.css">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:600italic,400,800,700,300' rel='stylesheet' type='text/css'>
@@ -17,6 +16,19 @@
       <script src="js/html5shiv.js"></script>
       <script src="js/respond.min.js"></script>
     <![endif]-->
+    <style>
+        .top-header { 
+            background: #18171D !important; 
+        }
+        .top-header img.logo { 
+            margin-top: -30px; 
+            margin-bottom: 15px;
+        }
+        .nav-bar {
+            margin-top: 6px;
+        }
+    </style>
+
 </head>
 <body>
     <!-- ====================================================
@@ -40,9 +52,9 @@
                             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                               <ul class="nav navbar-nav navbar-right">
                                 <li><a href="{{ url_for('home') }}">Acasă</a></li>
-                                <li><a href="#features">Caracteristici</a></li>
-                                <li><a href="#about">Despre proiect</a></li>
-                                <li><a href="" style="color: #FFFF00"><i class="fa fa-tachometer"></i> PANOU DE CONTROL</a></li>
+                                <li><a href="{{ url_for('home') }}#features">Caracteristici</a></li>
+                                <li><a href="{{ url_for('home') }}#about">Despre proiect</a></li>
+                                <li><a href="{{ url_for('dashboard') }}" style="color: #FFFF00"><i class="fa fa-tachometer"></i> PANOU DE CONTROL</a></li>
                               </ul>
                             </div>
                         </div>
@@ -56,9 +68,23 @@
     <section class="content">
         <div class="container">
             <div class="row">
-                <div class="col-xs-12">
-                   {% block content %}{% endblock %}
-                </div>
+
+                <br><div style="clear:both"></div><br>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                            {% if category == 'message' %}
+                              <br><br><div class="alert alert-warning" role="alert">
+                            {% else %}
+                              <br><br><div class="alert alert-{{ category }}" role="alert">
+                            {% endif %}
+                              {{ message }}
+                            </div>
+                        {% endfor %}
+                      {% endif %}
+                  {% endwith %}
+                {% block content %}{% endblock %}
             </div>
         </div>
     </section><!-- end of content section -->
@@ -81,9 +107,6 @@
     <!-- script tags
     ============================================================= -->
     <script src="/static/js/jquery-2.1.1.js"></script>
-    <script src="/static/js/smoothscroll.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/custom.js"></script>
-    <script src="/static/js/wow.js"></script>
 </body>
 </html>
