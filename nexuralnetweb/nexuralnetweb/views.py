@@ -89,7 +89,9 @@ def project(projectName):
     formAddNetworkTraining = AddNetworkTrainingForm()
     formAddNetworkTraining.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
 
-    return render_template('project.html', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, formAddNetworkFile = formAddNetworkFile, formAddNetworkTest = formAddNetworkTest, formAddNetworkTraining = formAddNetworkTraining)
+    return render_template('project.html', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
+        formAddNetworkFile = formAddNetworkFile, formAddNetworkTest = formAddNetworkTest, formAddNetworkTraining = formAddNetworkTraining, 
+        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles)
 
 
 
@@ -120,7 +122,8 @@ def addNetworkTest(projectName):
                     flash(err, 'danger')
             return redirect(redirectUrlFail)
         else:
-            # TODO: Add the logic
+            # TODO: Check if testName exists
+            engine.addTest(projectName, form.testName.data, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
             redirectUrlSuccess = '/viewTest/' + projectName + '/' + form.testName.data
             flash('Testul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrlSuccess)

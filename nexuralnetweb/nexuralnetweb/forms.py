@@ -25,7 +25,7 @@ class AddNetworkTestForm(FlaskForm):
 	networkArhitecture = SelectField('Arhitectura retelei:', [validators.Required()], choices = [])
 	trainedFile = SelectField('Antrenament:', [validators.Required()], choices = [])
 	imageFile = FileField("Imagine:", validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png', 'bmp'], 'Sunt acceptate doar fisirele de tip imagine!')])
-	readType = SelectField('Mod citire imagine:', [validators.Required()], choices = [('color', '3 canale'), ('gray', '1 canal')])
+	readType = SelectField('Mod citire imagine:', [validators.Required()], choices = [('0', '1 canal'), ('1', '3 canale')])
 	submit = SubmitField("Trimite")
 
 	def setArhitecturesChoices(self, availableNetworkArhitectures, availableTrainedFiles):
@@ -37,8 +37,8 @@ class AddNetworkTrainingForm(FlaskForm):
 	networkArhitecture = SelectField('Arhitectura retelei:', [validators.Required()], choices = [])
 	trainingFile = SelectField('Fisier de antrenament:', [validators.Required()], choices = [])
 	trainingDataSet = SelectField('Set de date:', [validators.Required()], choices = [])
-	trainingDataType = SelectField('Tip date de antrenare:', [validators.Required()], choices = [('color', '3 canale'), ('gray', '1 canal')])
-	targetType = SelectField('Tip date:', [validators.Required()], choices = [('color', '3 canale'), ('gray', '1 canal')])
+	trainingDataType = SelectField('Tip date de antrenare:', [validators.Required()], choices = [('IMAGES_DIRECTORY', 'Director de imagini'), ('TXT_DATA_FILE', 'Fisier tensor'), ('MNIST_DATA_FILE', 'Fisier MNIST')])
+	targetType = SelectField('Tip date:', [validators.Required()], choices = [('TXT_DATA_FILE', 'Fisier tensor'), ('MNIST_DATA_FILE', 'Fisier MNIST')])
 	submit = SubmitField("Trimite")
 
 	def setChoices(self, availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets):

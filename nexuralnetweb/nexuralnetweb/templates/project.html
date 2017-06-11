@@ -72,11 +72,49 @@
         <!-- Tab panes -->
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="fisiereconfigurare">
-                fisiere de configurare
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                         <th>Nume fișier de configurare</th>
+                         <th>Acțiuni</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in availableNetworkArhitectures.iteritems() %}
+                            <tr>
+                                <td> {{ key }}</td>
+                                <td> 
+                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
+                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-danger"><i class="fa fa-download" aria-hidden="true"></i> Șterge</a>
+                                </td>
+                            </tr>          
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+
             <div role="tabpanel" class="tab-pane" id="fisiereantremaent">
-                fisiere de antrenament
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                         <th>Nume fișier de antrenament</th>
+                         <th>Acțiuni</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in availableTrainingFiles.iteritems() %}
+                            <tr>
+                                <td> {{ key }}</td>
+                                <td> 
+                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
+                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-danger"><i class="fa fa-download" aria-hidden="true"></i> Șterge</a>
+                                </td>
+                            </tr>          
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+
             <div role="tabpanel" class="tab-pane" id="teste">
                 teste
             </div>

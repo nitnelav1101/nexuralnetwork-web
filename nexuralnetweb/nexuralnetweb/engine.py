@@ -4,11 +4,7 @@ import os
 import fnmatch
 import glob
 from werkzeug.utils import secure_filename, MultiDict
-
-def isAllowedFile(filename, ALLOWED_EXTENSIONS):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+import nexuralnetengine
 
 
 def addProject(projectName, accessCode):
@@ -92,3 +88,32 @@ def checkAccessCode(projectName, accessCode):
 def createDirectory(dirPath):
     if not os.path.isdir(dirPath) and not os.path.exists(dirPath):
     	os.makedirs(dirPath)
+
+
+def addTest(projectName, testName, networkArhitecture, trainedFile, formFile, readType):
+    currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+    resultFilePath = os.path.join(currentTestPath, 'result.json') 
+    detailsFilePath = os.path.join(currentTestPath, 'details.json')
+    filtersFolderPath = os.path.join(currentTestPath, app.config['TESTS_FILTERS_IMAGES_FOLDER_NAME'])
+    networkArhitecturePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkArhitecture)
+    trainedFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINED_NETWORK_FILES_FOLDER_NAME'], trainedFile)
+
+
+    createDirectory(filtersFolderPath)
+
+    filename, fileExtension = os.path.splitext(secure_filename(formFile.filename))
+    filename = "image" + fileExtension
+    completeFilename = os.path.join(currentTestPath, filename)
+    formFile.save(completeFilename)
+
+    details = "{ \"network_config\": \"" + networkArhitecture + "\", \"trained_file\": \"" + trainedFile + "\", \"image_file\": \"" + filename + "\", \"readType\": \"" + readType + "\"}"
+    file = open(detailsFilePath, 'w')
+    file.write(details)
+    file.close()
+
+    if readType == 0:	
+    	openImageType = 0
+    else:
+    	openImageType = 1
+
+    nexuralnetengine.runNetwork(networkArhitecturePath, trainedFilePath, completeFilename, openImageType, filtersFolderPath, resultFilePath)
