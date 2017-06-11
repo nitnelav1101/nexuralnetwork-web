@@ -2,26 +2,254 @@
 
 {% block content %}
 <style>
-.or_option{
-    font-size: 14px;
-    color: #008ed6;
-    text-transform: uppercase;
-    margin-top: 65px;
-    font-weight: 700;
-}
+    .or_option {
+        font-size: 14px;
+        color: #008ed6;
+        text-transform: uppercase;
+        margin-top: 65px;
+        font-weight: 700;
+    }
+
+    .instructions {
+        padding: 20px;
+        background-color: #f5f5f5;
+    }
 </style>
 
 <div class="col-xs-12 col-sm-12 col-md-12">
 	<div class="page-header">
-		<h1><i class="fa fa-cog"></i> Gestionați proiectul <small>{{ projectName }}</small></h1>
-	</div>
+        {% if isProjectOwner == True %}
+        <h1><i class="fa fa-cog"></i> Gestionați proiectul <small>{{ projectName }}</small></h1>
+        {% else %}
+        <h1><i class="fa fa-cog"></i> Vizualizați proiectul <small>{{ projectName }}</small></h1>
+        {% endif %}
+    </div>
 
-	<div style="clear:both"></div>
+    <div class="row">
+        <ol class="breadcrumb bread-primary ">
+            <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
+            <li class="active">GESTIONATI PROIECT</li>
+        </ol>
+    </div>
+
+    <div style="clear:both"></div>
 
 
+    <div class="col-md-3">
+        <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddNetworkFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de configurare</button>
+        <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddTrainingFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de antrenament</button>
+        <a href="{{ url_for('manageProjectDatasets', projectName = projectName) }}" class="btn btn-block btn-warning"><i class="fa fa-database" aria-hidden="true"></i> Gestionează seturile de date</a>
+        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un test nou</button>
+        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formAddNetworkTrainingModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un antrenament nou</button>
+    </div>
+
+    <div class="col-md-9">
+        <div class="instructions">
+            <h1 class="dark-grey">Instrucțiuni de utilizare</h1>
+            <p>
+                Din acest panou puteți adăuga fișiere noi de configurare, fișiere de antrenament, gestiona seturile de date și bineînțeles puteți iniția antrenamente noi, teste noi sau pur și simplu vizualizați detalii legate de fișiere deja generate.
+            </p>
+            <p>
+                Vă punem la dispoziție două fișiere exemplu, unul pentru configurarea rețelei dorite, iar celalalt pentru configurarea modului de antrenament. Puteți modifica parametrii, singura restricție fiind aceea de a păstra structura, in caz contrar când veți rula procesele o să primiți mesaje de eroare.
+            </p>
+            <a href="{{ url_for('downloadExampleFile', filename = 'network.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de configurare</a>
+            <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de antrenament</a>
+        </div>
+    </div>
+
+    <div style="clear:both"></div><hr>
+
+    <div class="col-md-12">
+    <!-- Nav tabs -->
+    <div class="card">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#fisiereconfigurare" aria-controls="fisiereconfigurare" role="tab" data-toggle="tab">Fișiere de configurare</a></li>
+            <li role="presentation"><a href="#fisiereantremaent" aria-controls="fisiereantremaent" role="tab" data-toggle="tab">Fișiere de antrenament</a></li>
+            <li role="presentation"><a href="#teste" aria-controls="teste" role="tab" data-toggle="tab">Teste</a></li>
+            <li role="presentation"><a href="#antrenamente" aria-controls="antrenamente" role="tab" data-toggle="tab">Antrenamente</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="fisiereconfigurare">
+                fisiere de configurare
+            </div>
+            <div role="tabpanel" class="tab-pane" id="fisiereantremaent">
+                fisiere de antrenament
+            </div>
+            <div role="tabpanel" class="tab-pane" id="teste">
+                teste
+            </div>
+            <div role="tabpanel" class="tab-pane" id="antrenamente">
+                antrenamente
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>
 
-<br><div style="clear:both"></div><br>
+
+<br><div style="clear:both"></div>
+
+
+<!-- Modal add network file -->
+<div class="modal fade" id="formAddNetworkFileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un fișier nou de configurare</h4>
+    </div>
+    <form class="form form-horizontal" action="{{ url_for('addNetworkFile', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkFile">
+      {{ formAddNetworkFile.hidden_tag() }}
+      <div class="modal-body">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            {{ formAddNetworkFile.hidden_tag() }}
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                {{ formAddNetworkFile.networkFile(class_="form-control") }}  
+            </div>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+        {{ formAddNetworkFile.submit(id_="button", class_="btn btn-primary") }}
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+<!-- Modal add training file -->
+<div class="modal fade" id="formAddTrainingFileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un fișier nou de antrenament</h4>
+    </div>
+    <form class="form form-horizontal" action="{{ url_for('addTrainingFile', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addTrainingFile">
+      {{ formAddTrainingFile.hidden_tag() }}
+      <div class="modal-body">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            {{ formAddTrainingFile.hidden_tag() }}
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                {{ formAddTrainingFile.trainingFile(class_="form-control") }}  
+            </div>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+        {{ formAddTrainingFile.submit(id_="button", class_="btn btn-primary") }}
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+
+<!-- Modal add test -->
+<div class="modal fade" id="formAddNetworkTestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un test nou</h4>
+    </div>
+    <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
+      {{ formAddNetworkTest.hidden_tag() }}
+      <div class="modal-body">
+       <div class="row">
+                <div class="col-md-12">
+                    {{ formAddNetworkTest.testName.label }} <br>
+                    {{ formAddNetworkTest.testName(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.networkArhitecture.label }} <br>
+                    {{ formAddNetworkTest.networkArhitecture(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.trainedFile.label }} <br>
+                    {{ formAddNetworkTest.trainedFile(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.imageFile.label }} <br>
+                    {{ formAddNetworkTest.imageFile(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.readType.label }} <br>
+                    {{ formAddNetworkTest.readType(class_="form-control") }} <br>
+                </div>
+            </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+        {{ formAddNetworkTest.submit(id_="button", class_="btn btn-primary") }}
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+
+<!-- Modal add training -->
+<div class="modal fade" id="formAddNetworkTrainingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un antrenament nou</h4>
+    </div>
+    <form class="form form-horizontal" action="{{ url_for('addNetworkTraining', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkTraining">
+      {{ formAddNetworkTraining.hidden_tag() }}
+      <div class="modal-body">
+       <div class="row">
+                <div class="col-md-6">
+                    {{ formAddNetworkTraining.trainingName.label }} <br>
+                    {{ formAddNetworkTraining.trainingName(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTraining.networkArhitecture.label }} <br>
+                    {{ formAddNetworkTraining.networkArhitecture(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTraining.trainingFile.label }} <br>
+                    {{ formAddNetworkTraining.trainingFile(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTraining.trainingDataSet.label }} <br>
+                    {{ formAddNetworkTraining.trainingDataSet(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTraining.trainingDataType.label }} <br>
+                    {{ formAddNetworkTraining.trainingDataType(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTraining.targetType.label }} <br>
+                    {{ formAddNetworkTraining.targetType(class_="form-control") }} <br>
+                </div>
+            </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+        {{ formAddNetworkTraining.submit(id_="button", class_="btn btn-primary") }}
+    </div>
+</form>
+</div>
+</div>
+</div>
 
 {% endblock %}

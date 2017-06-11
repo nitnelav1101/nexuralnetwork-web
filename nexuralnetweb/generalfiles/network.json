@@ -1,0 +1,107 @@
+{
+  "network_layers": [
+    {
+      "type": "tensor_input",
+      "params": {
+        "num_samples": "1",
+        "k": "1",
+        "nr": "1",
+        "nc": "2"
+      }
+    },
+    {
+      "type": "bgr_image_input",
+      "params": {
+        "input_width": "3",
+        "input_height": "3"
+      }
+    },
+    {
+      "type": "gray_image_input",
+      "params": {
+        "input_width": "3",
+        "input_height": "3"
+      }
+    },
+    {
+      "type": "average_pooling",
+      "params": {
+        "kernel_width": "2",
+        "kernel_height": "2"
+      }
+    },
+    {
+      "type": "max_pooling",
+      "params": {
+        "kernel_width": "3",
+        "kernel_height": "2"
+      }
+    },
+    {
+      "type": "convolutional",
+      "params": {
+        "num_of_filters": "5",
+        "kernel_width": "2",
+        "kernel_height": "2",
+        "padding_width": "0",
+        "padding_height": "0",
+        "stride_width": "1",
+        "stride_height": "1"
+      }
+    },
+    {
+      "type": "relu",
+      "params": {
+
+      }
+    },
+    {
+      "type": "leaky_relu",
+      "params": {
+
+      }
+    },
+    {
+      "type": "tanh",
+      "params": {
+
+      }
+    },
+    {
+      "type": "dropout",
+      "params": {
+
+      }
+    },
+    {
+      "type": "fully_connected",
+      "params": {
+        "neurons": "10"
+      }
+    },
+    {
+      "type": "relu",
+      "params": {
+
+      }
+    },
+    {
+      "type": "mse",
+      "params": {
+
+      }
+    },
+    {
+      "type": "rmse",
+      "params": {
+
+      }
+    },
+    {
+      "type": "softmax",
+      "params": {
+
+      }
+    }
+  ]
+}
