@@ -5,7 +5,7 @@ import os
 def runNetwork(networkArhitecture, trainedFile, imageFile, openImageType, filtersFolderPath, resultFilePath):
 	net = nexuralnet.network(networkArhitecture)
 	net.deserialize(trainedFile)
-	image = cv2.imread(imageFile, 0) 
+	image = cv2.imread(imageFile, int(openImageType)) 
 	net.run(image)
 
 	net.saveFiltersImages(filtersFolderPath)

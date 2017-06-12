@@ -5,6 +5,7 @@ import fnmatch
 import glob
 from werkzeug.utils import secure_filename, MultiDict
 import nexuralnetengine
+import json
 
 
 def addProject(projectName, accessCode):
@@ -27,6 +28,12 @@ def getAllProjects():
 	return dirs
 
 
+def getAllTestFilters(projectName, testName):
+	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'filters'))]
+	dic = []
+	for x in files:
+		dic.append(os.path.basename(x))
+	return dic
 
 def getAllTrainedNetworkFiles(projectName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINED_NETWORK_FILES_FOLDER_NAME'])) if fnmatch.fnmatch(f, '*.json')]
@@ -50,6 +57,13 @@ def getAllTriningFiles(projectName):
 	for x in files:
 		dic.add(os.path.basename(x), os.path.basename(x))
 	return dic
+
+
+
+def getAllProjectTests(projectName):
+	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, 'tests')) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, 'tests', d))]
+	return dirs
+
 
 
 def isProjectOwner(projectName):
@@ -90,6 +104,13 @@ def createDirectory(dirPath):
     	os.makedirs(dirPath)
 
 
+def existsTest(projectname, testName):
+	currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+	if os.path.isdir(dirPath) and os.path.exists(dirPath):
+		return True
+	else:
+		return False
+
 def addTest(projectName, testName, networkArhitecture, trainedFile, formFile, readType):
     currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
     resultFilePath = os.path.join(currentTestPath, 'result.json') 
@@ -111,9 +132,18 @@ def addTest(projectName, testName, networkArhitecture, trainedFile, formFile, re
     file.write(details)
     file.close()
 
-    if readType == 0:	
-    	openImageType = 0
-    else:
-    	openImageType = 1
+    nexuralnetengine.runNetwork(networkArhitecturePath, trainedFilePath, completeFilename, readType, filtersFolderPath, resultFilePath)
 
-    nexuralnetengine.runNetwork(networkArhitecturePath, trainedFilePath, completeFilename, openImageType, filtersFolderPath, resultFilePath)
+
+def getResult(projectName, testName):
+	path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'result.json')
+	data = json.load(open(path))
+	resultType = data['result_type']
+
+	if resultType == "classification":
+		resultMessage = "Cea mai buna clasa de potrivire: "
+	else:
+		resultMessage = "Rezultatul este: "
+
+	resultMessage = resultMessage + data['best_class']
+	return resultType, resultMessage

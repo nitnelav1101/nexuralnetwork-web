@@ -1,9 +1,10 @@
-from flask import flash, redirect, render_template, request, url_for, session, send_file
+from flask import flash, redirect, render_template, request, url_for, session, send_file, send_from_directory
 from werkzeug.utils import secure_filename, MultiDict
 from nexuralnetweb import app
 from forms import CreateProjectForm, SecureProjectForm, AddTrainingFileForm, AddNetworkFileForm, AddNetworkTestForm, AddNetworkTrainingForm
 import engine
 import os
+import shutil
 
 
 @app.route('/')
@@ -79,6 +80,7 @@ def project(projectName):
     availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
     availableTrainingFiles = engine.getAllTriningFiles(projectName)
     availableTrainingDataSets = engine.getAllTrainedNetworkFiles(projectName)
+    availableTests = engine.getAllProjectTests(projectName)
 
     formAddTrainingFile = AddTrainingFileForm()
     formAddNetworkFile = AddNetworkFileForm()
@@ -91,7 +93,25 @@ def project(projectName):
 
     return render_template('project.html', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
         formAddNetworkFile = formAddNetworkFile, formAddNetworkTest = formAddNetworkTest, formAddNetworkTraining = formAddNetworkTraining, 
-        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles)
+        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTests = availableTests)
+
+
+
+@app.route('/getFileFromTest/<string:projectName>/<string:testName>/<path:filename>')
+def getFileFromTest(projectName, testName, filename):
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+    return send_from_directory(path, filename)
+
+
+
+@app.route('/viewTest/<string:projectName>/<string:testName>')
+def viewTest(projectName, testName):
+    isProjectOwner = engine.isProjectOwner(projectName)
+    filtersImages = engine.getAllTestFilters(projectName, testName)
+    
+    resultType, resultMessage = engine.getResult(projectName, testName)
+    return render_template('view_test.html', projectName = projectName, testName = testName, isProjectOwner = isProjectOwner, 
+        resultType = resultType, resultMessage = resultMessage, filtersImages = filtersImages)
 
 
 
@@ -122,11 +142,14 @@ def addNetworkTest(projectName):
                     flash(err, 'danger')
             return redirect(redirectUrlFail)
         else:
-            # TODO: Check if testName exists
-            engine.addTest(projectName, form.testName.data, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
-            redirectUrlSuccess = '/viewTest/' + projectName + '/' + form.testName.data
-            flash('Testul a fost adaugat cu succes!', 'success')
-            return redirect(redirectUrlSuccess)
+            if engine.existsTest(projectName, form.testName.data) == True:
+                flash('Exista un test cu acest nume!', 'danger')
+                return redirect(redirectUrlFail)
+            else:
+                engine.addTest(projectName, form.testName.data, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
+                redirectUrlSuccess = '/viewTest/' + projectName + '/' + form.testName.data
+                flash('Testul a fost adaugat cu succes!', 'success')
+                return redirect(redirectUrlSuccess)
 
 
 
@@ -214,3 +237,50 @@ def addTrainingFile(projectName):
 def downloadExampleFile(filename):
     filePath = os.path.join('..', app.config['GENERAL_FILES_FOLDER_NAME'], filename)
     return send_file(filePath)
+
+
+@app.route('/deleteConfigFile/<string:projectName>/<string:networkConfigFile>')
+def deleteConfigFile(projectName, networkConfigFile):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
+    os.remove(path)
+
+    flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    return redirect(redirectUrl)
+
+
+
+@app.route('/deleteTrainingFile/<string:projectName>/<string:trainingConfigFile>')
+def deleteTrainingFile(projectName, trainingConfigFile):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
+    os.remove(path)
+
+    flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    return redirect(redirectUrl)
+
+
+
+@app.route('/deleteTest/<string:projectName>/<string:testName>')
+    def deleteTrainingFile(projectName, testName):
+        redirectUrl = '/project/' + projectName
+
+        if engine.isProjectOwner(projectName) == False:
+            flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+            return redirect(redirectUrl)
+
+        path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+        shutil.rmtree(path)
+
+        flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+        return redirect(redirectUrl)

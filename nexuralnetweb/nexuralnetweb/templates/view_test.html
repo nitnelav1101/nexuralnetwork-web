@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+.login {
+    margin-top:27px;
+}
+.set-logo {
+    background:#fff;
+    color:#ddd;
+    border-radius:500%;
+    padding:11px;
+    font-size:108px;
+    border: solid #ddd 14px;
+}
+.logo {
+    margin-top:27px;
+    margin-bottom:54px;
+}
+
+.last-row {
+    margin-bottom:0px;
+}
+
+.checklabel {
+    font-weight:100;
+}
+</style>
+
+<div class="col-xs-12 col-sm-12 col-md-12">
+	<div class="page-header">
+      <h1><i class="fa fa-cogs" aria-hidden="true"></i> Vizualizați rezultatele testului <small>{{ testName }} din proiectul {{ projectName }}</small></h1>
+	</div>
+
+    <div class="row">
+        <ol class="breadcrumb bread-primary ">
+            <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
+            <li class="active">GESTIONATI PROIECT</li>
+        </ol>
+    </div>
+</div>
+
+
+<div class="row login">
+        <div class="col-md-4 col-sm-6 well">
+              <div class="form-group text-center">
+              <h3><b>TEST REALIZAT PENTRU</b></h3>
+                <div class="logo">
+                    <img class="set-logo" src=" {{ url_for('getFileFromTest', projectName = projectName, testName = testName, filename = 'image.jpg') }} " height="242" width="242">
+                </div>
+              </div>
+            {{ resultMessage }}
+        </div>
+    </div>
+
+
+    {% for imageName in filtersImages %}
+                            <img  src=" {{ url_for('getFileFromTest', projectName = projectName, testName = testName, filename = 'filters/' + imageName) }} " height="80" width="80">      
+                        {% endfor %}
+
+<br><div style="clear:both"></div><br>
+
+{% endblock %}
