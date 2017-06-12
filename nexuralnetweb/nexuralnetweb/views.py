@@ -272,15 +272,15 @@ def deleteTrainingFile(projectName, trainingConfigFile):
 
 
 @app.route('/deleteTest/<string:projectName>/<string:testName>')
-    def deleteTrainingFile(projectName, testName):
-        redirectUrl = '/project/' + projectName
+def deleteTest(projectName, testName):
+    redirectUrl = '/project/' + projectName
 
-        if engine.isProjectOwner(projectName) == False:
-            flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
-            return redirect(redirectUrl)
-
-        path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
-        shutil.rmtree(path)
-
-        flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
         return redirect(redirectUrl)
+
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+    shutil.rmtree(path, ignore_errors=True)
+
+    flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    return redirect(redirectUrl)

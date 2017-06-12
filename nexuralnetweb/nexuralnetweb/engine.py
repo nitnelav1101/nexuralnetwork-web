@@ -18,6 +18,10 @@ def addProject(projectName, accessCode):
         file.close()
         session.pop('access_code', None)
     	session['access_code'] = accessCode
+    	createDirectory(os.path.join(projectPath, app.config['TRAINING_FILES_FOLDER_NAME']))
+    	createDirectory(os.path.join(projectPath, app.config['TRAINED_NETWORK_FILES_FOLDER_NAME']))
+    	createDirectory(os.path.join(projectPath, app.config['NETWORK_FILES_FOLDER_NAME']))
+    	createDirectory(os.path.join(projectPath, app.config['TESTS_FILES_FOLDER_NAME']))
         return True
     else:
         return False
@@ -104,9 +108,9 @@ def createDirectory(dirPath):
     	os.makedirs(dirPath)
 
 
-def existsTest(projectname, testName):
+def existsTest(projectName, testName):
 	currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
-	if os.path.isdir(dirPath) and os.path.exists(dirPath):
+	if os.path.isdir(currentTestPath) and os.path.exists(currentTestPath):
 		return True
 	else:
 		return False

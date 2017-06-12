@@ -141,7 +141,7 @@
                                 <td> {{ test }}</td>
                                 <td class="text-right"> 
                                     <a href="{{ url_for('viewTest', projectName = projectName, testName = test) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Deschide</a>
-                                    <a href="{{ url_for('deleteTrainingFile', projectName = projectName, testname = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    <a href="{{ url_for('deleteTest', projectName = projectName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
                                 </td>
                             </tr>          
                         {% endfor %}
