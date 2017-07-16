@@ -6,6 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>{{ title }}</title>
+    <link rel='shortcut icon' type='image/x-icon' href='/static/img/favicon.ico' />
     <link rel="stylesheet" href="/static/css/font-awesome.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
@@ -28,6 +29,16 @@
         .nav-bar {
             margin-top: 6px;
         }
+
+        .page-subnav {
+    padding: 0 20px;
+}
+.page-subnav a {
+    color: #fff !important;
+}
+.page-subnav a:hover {
+    color: #008ed6 !important;
+}
     </style>
 
 </head>
@@ -52,7 +63,7 @@
                             </div>
                             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                               <ul class="nav navbar-nav navbar-right">
-                                <li><a href="{{ url_for('home') }}" style="color: #FFFF00"><i class="fa fa-tachometer"></i> Înapoi la prima pagină</a></li>
+                                <li><a href="{{ url_for('home') }}" style="color: #008ed6; text-transform: uppercase !important;"><i class="fa fa-home"></i> Înapoi la prima pagină</a></li>
                               </ul>
                             </div>
                         </div>
@@ -63,7 +74,7 @@
     </header><!-- end of header section -->
 
     <!-- content section starts here -->
-    <section class="content">
+    <div class="content">
         <div class="container">
             <div class="row">
 
@@ -83,9 +94,10 @@
                       {% endif %}
                   {% endwith %}
                 {% block content %}{% endblock %}
+                </div>
             </div>
         </div>
-    </section><!-- end of content section -->
+    </div><!-- end of content section -->
 
     <!-- footer starts here -->
     <footer class="footer text-center">

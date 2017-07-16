@@ -10,7 +10,6 @@ import shutil
 @app.route('/')
 @app.route('/home')
 def home():
-    """Renders the home page."""
     return render_template(
         'index.html',
         title = 'neXuralNet Project'
@@ -20,7 +19,6 @@ def home():
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    """Renders the dashboadr page."""
     form = CreateProjectForm()
     existingProjects = engine.getAllProjects()
    
@@ -29,24 +27,23 @@ def dashboard():
             for fieldName, errorMessages in form.errors.iteritems():
                 for err in errorMessages:
                     flash(err, 'danger')
-            return render_template('dashboard.html', form = form, existingProjects = existingProjects)
+            return render_template('dashboard.html', title = 'Panou de control | neXuralNet Project', form = form, existingProjects = existingProjects)
         else:
-            if engine.addProject(form.projectName.data, form.accessCode.data) == True:
+            projectName = engine.cleanAlphanumericString(form.projectName.data)
+            if engine.addProject(projectName, form.accessCode.data) == True:
                 flash('Proiectul a fost creat cu succes!', 'success')
-                redirectUrl = '/project/' + form.projectName.data
+                redirectUrl = '/project/' + projectName
                 return redirect(redirectUrl)
             else:
                 flash('Exista deja un proiect cu acest nume!', 'danger')
-                return render_template('dashboard.html', form = form, existingProjects = existingProjects)
+                return render_template('dashboard.html', title = 'Panou de control | neXuralNet Project', form = form, existingProjects = existingProjects)
     elif request.method == 'GET':
-        return render_template('dashboard.html', form = form, existingProjects = existingProjects)
+        return render_template('dashboard.html', title = 'Panou de control | neXuralNet Project', form = form, existingProjects = existingProjects)
 
 
 
 @app.route('/secureProject/<string:projectName>', methods=['GET', 'POST'])
 def secureProject(projectName):
-    """Renders the secure porject page."""
-
     if engine.isProjectOwner(projectName) == True:
         flash('Ati fost autentificat ca proprietar al acestui proiect!', 'success')
         redirectUrl = '/project/' + projectName
@@ -59,7 +56,7 @@ def secureProject(projectName):
             for fieldName, errorMessages in form.errors.iteritems():
                 for err in errorMessages:
                     flash(err, 'danger')
-            return render_template('secure_project.html', form = form, projectName = projectName)
+            return render_template('secure_project.html', title = 'Validare acces proiect | neXuralNet Project', form = form, projectName = projectName)
         else:
             if engine.checkAccessCode(projectName, form.accessCode.data) == True:
                 flash('Ati fost autentificat ca proprietar al acestui proiect!', 'success')
@@ -67,9 +64,9 @@ def secureProject(projectName):
                 return redirect(redirectUrl)
             else:
                 flash('Codul de acces nu este corect!', 'danger')
-                return render_template('secure_project.html', form = form, projectName = projectName)
+                return render_template('secure_project.html', title = 'Validare acces proiect | neXuralNet Project', form = form, projectName = projectName)
     elif request.method == 'GET':
-        return render_template('secure_project.html', form = form, projectName = projectName)
+        return render_template('secure_project.html', title = 'Validare acces proiect | neXuralNet Project', form = form, projectName = projectName)
 
 
 
@@ -91,7 +88,7 @@ def project(projectName):
     formAddNetworkTraining = AddNetworkTrainingForm()
     formAddNetworkTraining.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
 
-    return render_template('project.html', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
+    return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
         formAddNetworkFile = formAddNetworkFile, formAddNetworkTest = formAddNetworkTest, formAddNetworkTraining = formAddNetworkTraining, 
         availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTests = availableTests)
 
@@ -110,7 +107,7 @@ def viewTest(projectName, testName):
     filtersImages = engine.getAllTestFilters(projectName, testName)
     
     resultType, resultMessage = engine.getResult(projectName, testName)
-    return render_template('view_test.html', projectName = projectName, testName = testName, isProjectOwner = isProjectOwner, 
+    return render_template('view_test.html', title = 'Vizualizare test | neXuralNet Project', projectName = projectName, testName = testName, isProjectOwner = isProjectOwner, 
         resultType = resultType, resultMessage = resultMessage, filtersImages = filtersImages)
 
 
@@ -118,7 +115,8 @@ def viewTest(projectName, testName):
 @app.route('/manageProjectDatasets/<string:projectName>')
 def manageProjectDatasets(projectName):
     isProjectOwner = engine.isProjectOwner(projectName)
-    return render_template('manage_project_datasets.html', projectName = projectName, isProjectOwner = isProjectOwner)
+    availableDataSets = MultiDict([('a', 'b'), ('b', 'c')])
+    return render_template('manage_project_datasets.html', title = 'Gestionare dataseturi | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, availableDataSets = availableDataSets)
 
 
 
@@ -142,12 +140,14 @@ def addNetworkTest(projectName):
                     flash(err, 'danger')
             return redirect(redirectUrlFail)
         else:
-            if engine.existsTest(projectName, form.testName.data) == True:
+            testName = engine.cleanAlphanumericString(form.testName.data)
+            testDir = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+            if engine.dirExists(testDir) == True:
                 flash('Exista un test cu acest nume!', 'danger')
                 return redirect(redirectUrlFail)
             else:
-                engine.addTest(projectName, form.testName.data, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
-                redirectUrlSuccess = '/viewTest/' + projectName + '/' + form.testName.data
+                engine.addTest(projectName, testName, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
+                redirectUrlSuccess = '/viewTest/' + projectName + '/' + testName
                 flash('Testul a fost adaugat cu succes!', 'success')
                 return redirect(redirectUrlSuccess)
 
@@ -176,7 +176,8 @@ def addNetworkTraining(projectName):
             return redirect(redirectUrlFail)
         else:
             # TODO: Add the logic
-            redirectUrlSuccess = '/viewTest/' + projectName + '/' + form.testName.data
+            testName = engine.cleanAlphanumericString(form.testName.data)
+            redirectUrlSuccess = '/viewTest/' + projectName + '/' + testName
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrlSuccess)
 
@@ -202,7 +203,11 @@ def addNetworkFile(projectName):
             filename = secure_filename(f.filename)
             networkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])
             engine.createDirectory(networkFilesDirectory)
-            f.save(os.path.join(networkFilesDirectory, filename))
+            fileSave = os.path.join(networkFilesDirectory, filename)
+            if engine.fileExists(fileSave) == True:
+            	flash('Exista deja un fisier de configurare cu acest nume!', 'warning')
+            	return redirect(redirectUrl)
+            f.save(fileSave)
             flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
         return redirect(redirectUrl)
 
@@ -227,7 +232,11 @@ def addTrainingFile(projectName):
             filename = secure_filename(f.filename)
             trainingFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'])
             engine.createDirectory(trainingFilesDirectory)
-            f.save(os.path.join(trainingFilesDirectory, filename))
+            fileSave = os.path.join(trainingFilesDirectory, filename)
+            if engine.fileExists(fileSave):
+                flash('Exista deja un fisier de configurare cu acest nume!', 'warning')
+                return redirect(redirectUrl)
+            f.save(fileSave)
             flash('Fisierul de antrenament a fost adaugat cu succes!', 'success')
         return redirect(redirectUrl)
 

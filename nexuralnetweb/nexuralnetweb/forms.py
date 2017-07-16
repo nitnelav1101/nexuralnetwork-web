@@ -1,15 +1,19 @@
-from wtforms import TextField, IntegerField, TextAreaField, SubmitField, RadioField, SelectField
+from wtforms import TextField, IntegerField, TextAreaField, SubmitField, RadioField, SelectField, PasswordField
 from wtforms import validators, ValidationError
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 class CreateProjectForm(FlaskForm):
    projectName = TextField("Nume proiect:",[validators.Required(message='Va rugam sa alegeti un nume sugestiv pentru acest proiect.')])
-   accessCode = TextField("Cod de acces:",[validators.Required(message='Va rugam sa introduceti un cod personal de acces.')])
-   submit = SubmitField("Creeaza proiectul")
+   accessCode = PasswordField('Cod de acces:', [
+        validators.DataRequired(message='Va rugam sa introduceti un cod personal de acces.'),
+        validators.EqualTo('confirm', message='Parolele trebuie sa fie indentice!')
+    ])
+   confirm = PasswordField('Repetati codul de acces:')
+   submit = SubmitField("Adauga")
 
 class SecureProjectForm(FlaskForm):
-   accessCode = TextField("Cod de acces:",[validators.Required(message='Va rugam sa introduceti un cod personal de acces.')])
+   accessCode = PasswordField("Cod de acces:",[validators.DataRequired(message='Va rugam sa introduceti un cod personal de acces.')])
    submit = SubmitField("Trimite")
 
 class AddTrainingFileForm(FlaskForm):
@@ -37,9 +41,7 @@ class AddNetworkTrainingForm(FlaskForm):
 	networkArhitecture = SelectField('Arhitectura retelei:', [validators.Required()], choices = [])
 	trainingFile = SelectField('Fisier de antrenament:', [validators.Required()], choices = [])
 	trainingDataSet = SelectField('Set de date:', [validators.Required()], choices = [])
-	trainingDataType = SelectField('Tip date de antrenare:', [validators.Required()], choices = [('IMAGES_DIRECTORY', 'Director de imagini'), ('TXT_DATA_FILE', 'Fisier tensor'), ('MNIST_DATA_FILE', 'Fisier MNIST')])
-	targetType = SelectField('Tip date:', [validators.Required()], choices = [('TXT_DATA_FILE', 'Fisier tensor'), ('MNIST_DATA_FILE', 'Fisier MNIST')])
-	submit = SubmitField("Trimite")
+	submit = SubmitField("Porneste antrenamentul")
 
 	def setChoices(self, availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets):
 		self.networkArhitecture.choices = availableNetworkArhitectures.items()

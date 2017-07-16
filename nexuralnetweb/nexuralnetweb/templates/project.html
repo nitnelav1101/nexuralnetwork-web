@@ -28,50 +28,88 @@
     <div class="row">
         <ol class="breadcrumb bread-primary ">
             <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
-            <li class="active">GESTIONATI PROIECT</li>
+            {% if isProjectOwner == True %}
+            <li class="active">GESTIONARE PROIECT</li>
+            {% else %}
+            <li class="active">VIZUALIZARE PROIECT</li>
+            {% endif %}
         </ol>
     </div>
 
     <div style="clear:both"></div>
 
 
-    <div class="col-md-3">
-        <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddNetworkFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de configurare</button>
-        <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddTrainingFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de antrenament</button>
+    <div class="col-md-5">
+        {% if isProjectOwner == True %}
+        <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddNetworkFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de configurare a rețelei neurale</button>
+        <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddTrainingFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de configurare al modului de antrenament</button>
         <a href="{{ url_for('manageProjectDatasets', projectName = projectName) }}" class="btn btn-block btn-warning"><i class="fa fa-database" aria-hidden="true"></i> Gestionează seturile de date</a>
-        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un test nou</button>
-        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formAddNetworkTrainingModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un antrenament nou</button>
-    </div>
-
-    <div class="col-md-9">
-        <div class="instructions">
-            <h1 class="dark-grey">Instrucțiuni de utilizare</h1>
-            <p>
-                Din acest panou puteți adăuga fișiere noi de configurare, fișiere de antrenament, gestiona seturile de date și bineînțeles puteți iniția antrenamente noi, teste noi sau pur și simplu vizualizați detalii legate de fișiere deja generate.
-            </p>
-            <p>
-                Vă punem la dispoziție două fișiere exemplu, unul pentru configurarea rețelei dorite, iar celalalt pentru configurarea modului de antrenament. Puteți modifica parametrii, singura restricție fiind aceea de a păstra structura, in caz contrar când veți rula procesele o să primiți mesaje de eroare.
-            </p>
-            <a href="{{ url_for('downloadExampleFile', filename = 'network.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de configurare</a>
-            <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de antrenament</a>
+        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formAddNetworkTrainingModal"><i class="fa fa-cogs" aria-hidden="true"></i> Efectuează un antrenament nou</button>
+        {% else %}
+        <div class="alert alert-danger">
+          <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
         </div>
+        <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a>
+        {% endif %}
     </div>
 
-    <div style="clear:both"></div><hr>
+    <div class="col-md-7"> 
+    <div style="clear:both"></div>
+        <div class="instructions">
+        <div class="col-xs-12 col-md-4">
+            <div class="widget red-bg p-lg text-center">
+                <div class="m-b-md">
+                    <i class="fa fa-file-text-o fa-4x"></i>
+                    <h1 class="m-xs">{{ availableNetworkArhitectures|length }}</h1>
+                    <h3 class="font-bold no-margins">
+                         Fișier(e) de configurare a rețelei neurale de convoluție
+                    </h3>
+                </div>
+            </div>  
+        </div>
+        
+        <div class="col-xs-12 col-md-4">
+            <div class="widget lazur-bg p-lg text-center">
+                <div class="m-b-md">
+                    <i class="fa fa-file-code-o fa-4x"></i>
+                    <h1 class="m-xs">{{ availableTrainingFiles|length }}</h1>
+                    <h3 class="font-bold no-margins">
+                        Fișier(e) de configurare al modului de antrenament
+                    </h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xs-12 col-md-4">
+            <div class="widget navy-bg p-lg text-center">
+                <div class="m-b-md">
+                    <i class="fa fa-cogs fa-4x"></i>
+                    <h1 class="m-xs">{{ availableTrainings|length }}</h1>
+                    <h3 class="font-bold no-margins">
+                        Antrenament(e) efectuat(e) în acest proiect
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+
+    </div>
+
+ <div style="clear:both"></div><br>
 
     <div class="col-md-12">
     <!-- Nav tabs -->
     <div class="card">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#fisiereconfigurare" aria-controls="fisiereconfigurare" role="tab" data-toggle="tab">Fișiere de configurare</a></li>
-            <li role="presentation"><a href="#fisiereantremaent" aria-controls="fisiereantremaent" role="tab" data-toggle="tab">Fișiere de antrenament</a></li>
-            <li role="presentation"><a href="#teste" aria-controls="teste" role="tab" data-toggle="tab">Teste</a></li>
-            <li role="presentation"><a href="#antrenamente" aria-controls="antrenamente" role="tab" data-toggle="tab">Antrenamente</a></li>
+            <li role="presentation" class="active"><a href="#antrenamente" aria-controls="antrenamente" role="tab" data-toggle="tab"><i class="fa fa-cogs"></i> Antrenamente efectuate</a></li>
+            <li role="presentation"><a href="#fisiereconfigurare" aria-controls="fisiereconfigurare" role="tab" data-toggle="tab"><i class="fa fa-file-text-o"></i> Fișiere de configurare a rețelei neurale</a></li>
+            <li role="presentation"><a href="#fisiereantremaent" aria-controls="fisiereantremaent" role="tab" data-toggle="tab"><i class="fa fa-file-code-o"></i> Fișiere de configurare modului de antrenament</a></li>
         </ul>
 
         <!-- Tab panes -->
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="fisiereconfigurare">
+            <div role="tabpanel" class="tab-pane" id="fisiereconfigurare">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -89,7 +127,9 @@
                                 <td> {{ key }}</td>
                                 <td class="text-right"> 
                                     <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
-                                    <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% if isProjectOwner == True %}
+                                        <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% endif %}
                                 </td>
                             </tr>          
                         {% endfor %}
@@ -115,7 +155,9 @@
                                 <td> {{ key }}</td>
                                 <td class="text-right"> 
                                     <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
-                                    <a href="{{ url_for('deleteTrainingFile', projectName = projectName, trainingConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% if isProjectOwner == True %}
+                                        <a href="{{ url_for('deleteTrainingFile', projectName = projectName, trainingConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% endif %}
                                 </td>
                             </tr>          
                         {% endfor %}
@@ -123,32 +165,7 @@
                 </table>
             </div>
 
-            <div role="tabpanel" class="tab-pane" id="teste">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                         <th>Nume test</th>
-                         <th class="text-right"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% if availableTests|length == 0 %}
-                        <tr><td>nu sunt teste disponibile</td></tr>
-                        {% endif %}
-
-                        {% for test in availableTests %}
-                            <tr>
-                                <td> {{ test }}</td>
-                                <td class="text-right"> 
-                                    <a href="{{ url_for('viewTest', projectName = projectName, testName = test) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Deschide</a>
-                                    <a href="{{ url_for('deleteTest', projectName = projectName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
-                                </td>
-                            </tr>          
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div role="tabpanel" class="tab-pane" id="antrenamente">
+            <div role="tabpanel" class="tab-pane active" id="antrenamente">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -166,7 +183,9 @@
                                 <td> {{ training }}</td>
                                 <td class="text-right"> 
                                     <a href="{{ url_for('viewTraining', projectName = projectName, trainingName = training) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Deschide</a>
-                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% if isProjectOwner == True %}
+                                        <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% endif %}
                                 </td>
                             </tr>          
                         {% endfor %}
@@ -180,8 +199,38 @@
 </div>
 
 
-<br><div style="clear:both"></div>
+<br><div style="clear:both"></div><hr>
 
+        <section class="widget-type2">
+        <header>
+            <h2>
+                Instrucțiuni de utilizare:
+            </h2>
+        </header>
+        
+        <div class="widget-type2-body">
+            <p><strong>Această secțiune</strong> vă permite să gestionați antrenamentele si testele din cadrul proiectului selectat. Puteți adăuga fișiere noi de configurare a rețelei sau antrenamnetelor, gestiona seturile de date și bineînțeles puteți iniția antrenamente noi sau pur și simplu vizualizați detalii legate de fișierele deja generate.</p>
+            <ul class="text-list">
+                <li><strong>Adaugă fișier de configurare a rețelei neurale</strong> - de completat;</li>
+                <li><strong>Adaugă fișier de configurare al modului de antrenament</strong> - de completat;</li>
+                <li><strong>Efectuează un antrenament nou</strong> - de completat;</li>
+            </ul>
+
+             <p>
+                Vă punem la dispoziție două fișiere exemplu, unul pentru configurarea rețelei dorite, iar celalalt pentru configurarea modului de antrenament. Puteți modifica parametrii, singura restricție fiind aceea de a păstra structura, in caz contrar când veți rula procesele o să primiți mesaje de eroare.
+            </p>
+            <a href="{{ url_for('downloadExampleFile', filename = 'network.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de configurare</a>
+            <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de antrenament</a>
+            <br><br>
+            <p>
+                <i>Dacă întâmpinați probleme (erori) la una dintre opțiunile platformei vă rugăm să ne contactați! Vă mulțumim!</i>
+            </p>
+            
+        </div>
+    </section>
+
+
+<div style="clear:both"></div><br><br>
 
 <!-- Modal add network file -->
 <div class="modal fade" id="formAddNetworkFileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -189,7 +238,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Adaugă un fișier nou de configurare</h4>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un fișier nou de configurare a rețelei neurale</h4>
     </div>
     <form class="form form-horizontal" action="{{ url_for('addNetworkFile', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkFile">
       {{ formAddNetworkFile.hidden_tag() }}
@@ -217,8 +266,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Adaugă un fișier nou de antrenament</h4>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un fișier nou de configurare al modului de antrenament</h4>
     </div>
+
     <form class="form form-horizontal" action="{{ url_for('addTrainingFile', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addTrainingFile">
       {{ formAddTrainingFile.hidden_tag() }}
       <div class="modal-body">
@@ -240,62 +290,13 @@
 </div>
 
 
-<!-- Modal add test -->
-<div class="modal fade" id="formAddNetworkTestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Adaugă un test nou</h4>
-    </div>
-    <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
-      {{ formAddNetworkTest.hidden_tag() }}
-      <div class="modal-body">
-       <div class="row">
-                <div class="col-md-12">
-                    {{ formAddNetworkTest.testName.label }} <br>
-                    {{ formAddNetworkTest.testName(class_="form-control") }} <br>
-                </div>
-
-                <div class="col-md-6">
-                    {{ formAddNetworkTest.networkArhitecture.label }} <br>
-                    {{ formAddNetworkTest.networkArhitecture(class_="form-control") }} <br>
-                </div>
-
-                <div class="col-md-6">
-                    {{ formAddNetworkTest.trainedFile.label }} <br>
-                    {{ formAddNetworkTest.trainedFile(class_="form-control") }} <br>
-                </div>
-
-                <div class="col-md-6">
-                    {{ formAddNetworkTest.imageFile.label }} <br>
-                    {{ formAddNetworkTest.imageFile(class_="form-control") }} <br>
-                </div>
-
-                <div class="col-md-6">
-                    {{ formAddNetworkTest.readType.label }} <br>
-                    {{ formAddNetworkTest.readType(class_="form-control") }} <br>
-                </div>
-            </div>
-        <div style="clear:both"></div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-        {{ formAddNetworkTest.submit(id_="button", class_="btn btn-primary") }}
-    </div>
-</form>
-</div>
-</div>
-</div>
-
-
 <!-- Modal add training -->
 <div class="modal fade" id="formAddNetworkTrainingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Adaugă un antrenament nou</h4>
+        <h4 class="modal-title" id="myModalLabel">Efectuează un antrenament nou</h4>
     </div>
     <form class="form form-horizontal" action="{{ url_for('addNetworkTraining', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkTraining">
       {{ formAddNetworkTraining.hidden_tag() }}
@@ -319,16 +320,6 @@
                 <div class="col-md-6">
                     {{ formAddNetworkTraining.trainingDataSet.label }} <br>
                     {{ formAddNetworkTraining.trainingDataSet(class_="form-control") }} <br>
-                </div>
-
-                <div class="col-md-6">
-                    {{ formAddNetworkTraining.trainingDataType.label }} <br>
-                    {{ formAddNetworkTraining.trainingDataType(class_="form-control") }} <br>
-                </div>
-
-                <div class="col-md-6">
-                    {{ formAddNetworkTraining.targetType.label }} <br>
-                    {{ formAddNetworkTraining.targetType(class_="form-control") }} <br>
                 </div>
             </div>
         <div style="clear:both"></div>

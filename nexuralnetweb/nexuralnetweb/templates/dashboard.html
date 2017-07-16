@@ -24,11 +24,12 @@
 }
 .img-card {
   width: 100%;
-  height:150px;
+  height: 15px;
   border-top-left-radius:2px;
   border-top-right-radius:2px;
   display:block;
   overflow: hidden;
+  background-color: #337ab7 !important;
 }
 
 .card-content {
@@ -54,49 +55,75 @@
   font-weight:600;
   text-transform: uppercase
 }
+
+
+
+
+.jumbotron-codelines {
+    color: rgba(255,255,255,0.6);
+    background: url(/static/img/simple-codelines.svg),#2b3137;
+    background-position: center 10%;
+    background-size: cover;
+}
+
+.bg-gray-light {
+    background-color: #fafbfc !important;
+}
+
+.text-white {
+    color: #fff !important;
+}
+
+.text-gray {
+    color: #000 !important;
+    font-size: 1.5rem;
+    line-height: 1.6666666667;
+}
 </style>
 
+<br><br>
 <div class="col-xs-12 col-sm-12 col-md-12">
-	<div class="page-header">
-		<h1><i class="fa fa-tachometer"></i> Panou de control <small>creează și testează propria rețea neurală</small></h1>
-	</div>
 
-	<div style="clear:both"></div>
-
-
-
-	<div class="col-md-4 col-md-offset-4">
-		<center>
-			<span class="or_option">adaugă un proiect nou</span>
-			<img class="img-responsive" src="/static/img/daag.png" alt="">
-		</center>
-	</div>
-
-	<div style="clear:both"></div><br>
-
-	<div class="col-md-4 col-md-offset-4">
-		<form class="form form-horizontal" action="" method="post" name="createProject">
+<div class="jumbotron jumbotron-codelines">
+  <div class="container-lg p-responsive position-relative">
+    <div class="d-md-flex flex-items-center gutter-md-spacious">
+      <div class="col-md-7 text-md-left ">
+        <h1 class="alt-h0 text-white lh-condensed-ultra mb-3">Creează proiect</h1>
+        <p class="alt-lead mb-4">
+          Trebuie doar să alegeți numele proiectului, un cod de acces (ca altcineva să nu vă poată modifica munca) și sunteți gata să testați ce și cum doriți. Completați formularul alăturat și puteți începe lucrul fără alte bătăi de cap!
+          </p>
+      </div>
+        <div class="mx-auto col-sm-8 col-md-5 hide-sm rounded-1 bg-gray-light pt-4 pb-5">
+        <
+          <form class="form form-horizontal" action="" method="post" name="createProject">
 	      {{ form.hidden_tag() }}
 	      <p>
-	      	{{ form.projectName.label }} <br>
-	     	{{ form.projectName(class_="form-control") }} <br>   
-	      </p>
-
-	      <p>
-	      	{{ form.accessCode.label }} <br>
-	     	{{ form.accessCode(class_="form-control") }} <br>   
+	      	{{ form.projectName.label(class_="text-gray") }} <br>
+	     	{{ form.projectName(class_="form-control") }}   
+	      
+	      	{{ form.accessCode.label(class_="text-gray") }} <br>
+	     	{{ form.accessCode(class_="form-control") }}  
+	     
+	      	{{ form.confirm.label(class_="text-gray") }} <br>
+	     	{{ form.confirm(class_="form-control") }}  
 	      </p>
 
 	      {{ form.submit(id_="button", class_="btn btn-primary btn-lg btn-block login-button") }}
+	      <div style="clear:both"></div><br>
 	  	</form>
-	</div>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+  </div>
+</div>
 
-	<div style="clear:both"></div><br>
+
+	<div style="clear:both"></div>
 
 	<div class="col-md-4 col-md-offset-4">
 		<center>
-			<h2>SAU</h2>
-			<span class="or_option">deschide un proiect existent</span>
+		<h2>SAU</h2>
+			<span class="or_option">Puteți opta să vizualizați un proiect <br>deja existent</span>
 			<img class="img-responsive" src="/static/img/daag.png" alt="">
 		</center>
 	</div>
@@ -107,6 +134,7 @@
 		{% for project in existingProjects %}
 		<div class="col-xs-12 col-sm-4">
 			<div class="card">
+			<div class="img-card"> </div>
 		                <div class="card-content">
 		                    <h4 class="card-title">
 		                        {{ project }} 

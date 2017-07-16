@@ -6,6 +6,7 @@ import glob
 from werkzeug.utils import secure_filename, MultiDict
 import nexuralnetengine
 import json
+import re
 
 
 def addProject(projectName, accessCode):
@@ -108,12 +109,13 @@ def createDirectory(dirPath):
     	os.makedirs(dirPath)
 
 
-def existsTest(projectName, testName):
-	currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
-	if os.path.isdir(currentTestPath) and os.path.exists(currentTestPath):
-		return True
-	else:
-		return False
+def fileExists(dirPath):
+	return os.path.exists(dirPath)
+
+
+def dirExists(projectName, testName):
+	return os.path.isdir(currentTestPath) and os.path.exists(currentTestPath)
+
 
 def addTest(projectName, testName, networkArhitecture, trainedFile, formFile, readType):
     currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
@@ -151,3 +153,7 @@ def getResult(projectName, testName):
 
 	resultMessage = resultMessage + data['best_class']
 	return resultType, resultMessage
+
+
+def cleanAlphanumericString(content):
+	return re.sub(r'\W+', '', content)

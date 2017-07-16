@@ -14,18 +14,80 @@
 <div class="col-xs-12 col-sm-12 col-md-12">
 	<div class="page-header">
     {% if isProjectOwner == True %}
-      <h1><i class="fa fa-database"></i> Gestionați seturile de date pentru <small>{{ projectName }}</small></h1>
+      <h1><i class="fa fa-database"></i> Gestionați seturile de date pentru proiectul <small>{{ projectName }}</small></h1>
     {% else %}
-      <h1><i class="fa fa-database"></i> Vizualizați seturile de date pentru <small>{{ projectName }}</small></h1>
+      <h1><i class="fa fa-database"></i> Vizualizați seturile de date pentru proiectul <small>{{ projectName }}</small></h1>
     {% endif %}
 	</div>
 
     <div class="row">
-        <ol class="breadcrumb bread-primary ">
+        <ol class="breadcrumb bread-primary">
             <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
-            <li class="active">GESTIONATI PROIECT</li>
+            {% if isProjectOwner == True %}
+            <li class="active"><a href="{{ url_for('project', projectName = projectName) }}">GESTIONARE PROIECT</a></li>
+            <li class="active">GESTIONATI SETURI DE DATE</li>
+            {% else %}
+            <li class="active"><a href="{{ url_for('project', projectName = projectName) }}">VIZUALIZARE PROIECT</a></li>
+            <li class="active">VIZUALIZARE SETURI DE DATE</li>
+            {% endif %}
+     
         </ol>
     </div>
+
+        {% if isProjectOwner == True %}
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddDataSet"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un set nou de date</button>
+        {% else %}
+        <div class="alert alert-danger">
+          <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
+        </div>
+        <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a>
+        {% endif %}
+
+  <div style="clear:both"></div><br>
+
+    <div class="col-md-12">
+    <!-- Nav tabs -->
+    <div class="card">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#seturidedate" aria-controls="seturidedate" role="tab" data-toggle="tab"><i class="fa fa-database"></i> Seturi de date</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="seturidedate">
+                <table class="table table-striped ">
+                    <thead>
+                        <tr>
+                         <th>Nume set de date</th>
+                         <th class="text-right"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% if availableDataSets|length == 0 %}
+                        <tr><td>nu sunt fisiere disponibile</td></tr>
+                        {% endif %}
+
+                        {% for key, value in availableDataSets.iteritems() %}
+                            <tr>
+                                <td> {{ key }}</td>
+                                <td class="text-right"> 
+                                    {% if isProjectOwner == True %}
+                                        <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                    {% endif %}
+                                </td>
+                            </tr>          
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 </div>
 
 <br><div style="clear:both"></div><br>
