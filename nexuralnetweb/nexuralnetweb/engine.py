@@ -20,9 +20,9 @@ def addProject(projectName, accessCode):
         session.pop('access_code', None)
     	session['access_code'] = accessCode
     	createDirectory(os.path.join(projectPath, app.config['TRAINING_FILES_FOLDER_NAME']))
-    	createDirectory(os.path.join(projectPath, app.config['TRAINED_NETWORK_FILES_FOLDER_NAME']))
     	createDirectory(os.path.join(projectPath, app.config['NETWORK_FILES_FOLDER_NAME']))
-    	createDirectory(os.path.join(projectPath, app.config['TESTS_FILES_FOLDER_NAME']))
+    	createDirectory(os.path.join(projectPath, app.config['PROJECT_DATASETS_FOLDER_NAME']))
+    	createDirectory(os.path.join(projectPath, app.config['TRAININGS_FOLDER_NAME']))
         return True
     else:
         return False
@@ -30,6 +30,11 @@ def addProject(projectName, accessCode):
 
 def getAllProjects():
 	dirs = [d for d in os.listdir(app.config['BASE_PROJECTS_FOLDER_NAME']) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], d))]
+	return dirs
+
+
+def getAllProjectDatasets(projectName):
+	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], d))]
 	return dirs
 
 
@@ -113,7 +118,7 @@ def fileExists(dirPath):
 	return os.path.exists(dirPath)
 
 
-def dirExists(projectName, testName):
+def dirExists(currentTestPath):
 	return os.path.isdir(currentTestPath) and os.path.exists(currentTestPath)
 
 

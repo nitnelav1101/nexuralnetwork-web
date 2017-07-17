@@ -46,4 +46,10 @@ class AddNetworkTrainingForm(FlaskForm):
 	def setChoices(self, availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets):
 		self.networkArhitecture.choices = availableNetworkArhitectures.items()
 		self.trainingFile.choices = availableTrainingFiles.items()
-		self.trainingDataSet.choices = availableTrainingDataSets.items()
+		self.trainingDataSet.choices = [(status, status) for status in availableTrainingDataSets]
+
+
+class AddPredefinedDatSetForm(FlaskForm):
+	datasetName = TextField("Nume set de date:", [validators.Required(message='Va rugam sa alegeti un nume sugestiv pentru acest set de date.')])
+	predefinedDataSetType = SelectField('Alegeti setul predefinit:', [validators.Required()], choices = [('MNIST', 'Setul de date MNIST')])
+	submit = SubmitField("Adauga")

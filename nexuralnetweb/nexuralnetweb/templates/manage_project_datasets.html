@@ -35,7 +35,8 @@
     </div>
 
         {% if isProjectOwner == True %}
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddDataSet"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un set nou de date</button>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddPredefinedDataSet"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un set de date predefinit</button>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddDataSet"><i class="fa fa-plus" aria-hidden="true"></i> Importă un set de date local</button>
         {% else %}
         <div class="alert alert-danger">
           <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
@@ -64,15 +65,15 @@
                     </thead>
                     <tbody>
                         {% if availableDataSets|length == 0 %}
-                        <tr><td>nu sunt fisiere disponibile</td></tr>
+                        <tr><td>nu sunt seturi de date disponibile</td></tr>
                         {% endif %}
 
-                        {% for key, value in availableDataSets.iteritems() %}
+                        {% for key in availableDataSets %}
                             <tr>
                                 <td> {{ key }}</td>
                                 <td class="text-right"> 
                                     {% if isProjectOwner == True %}
-                                        <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                        <a href="{{ url_for('deleteDataset', projectName = projectName, datasetName = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
                                     {% endif %}
                                 </td>
                             </tr>          
@@ -84,12 +85,69 @@
     </div>
 </div>
 
-
-
-
-
 </div>
 
 <br><div style="clear:both"></div><br>
+
+
+<!-- Modal add predefined data set -->
+<div class="modal fade" id="formAddPredefinedDataSet" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un set de date predefinit</h4>
+    </div>
+
+    <form class="form form-horizontal" action="{{ url_for('addPredefinedDataSet', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addPredefinedDataSet">
+      <div class="modal-body">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            {{ formAddPredefinedDatSet.hidden_tag() }}
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                    {{ formAddPredefinedDatSet.datasetName.label }} <br>
+                    {{ formAddPredefinedDatSet.datasetName(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-xs-12 col-sm-12 col-md-12">
+                    {{ formAddPredefinedDatSet.predefinedDataSetType.label }} <br>
+                    {{ formAddPredefinedDatSet.predefinedDataSetType(class_="form-control") }} <br>
+                </div>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+        {{ formAddPredefinedDatSet.submit(id_="button", class_="btn btn-primary") }}
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+
+
+<!-- Modal add data set -->
+<div class="modal fade" id="formAddDataSet" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Importă un set de date local</h4>
+    </div>
+
+   
+      <div class="modal-body">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            Aceasta optiune nu este inca disponibila!
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+    </div>
+
+</div>
+</div>
+</div>
 
 {% endblock %}

@@ -1,11 +1,11 @@
 from flask import flash, redirect, render_template, request, url_for, session, send_file, send_from_directory
 from werkzeug.utils import secure_filename, MultiDict
 from nexuralnetweb import app
-from forms import CreateProjectForm, SecureProjectForm, AddTrainingFileForm, AddNetworkFileForm, AddNetworkTestForm, AddNetworkTrainingForm
+from forms import CreateProjectForm, SecureProjectForm, AddTrainingFileForm, AddNetworkFileForm, AddNetworkTestForm, AddNetworkTrainingForm, AddPredefinedDatSetForm
 import engine
 import os
 import shutil
-
+import json
 
 @app.route('/')
 @app.route('/home')
@@ -73,24 +73,19 @@ def secureProject(projectName):
 @app.route('/project/<string:projectName>')
 def project(projectName):
     isProjectOwner = engine.isProjectOwner(projectName)
-    availableTrainedFiles = engine.getAllTrainedNetworkFiles(projectName)
     availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
     availableTrainingFiles = engine.getAllTriningFiles(projectName)
-    availableTrainingDataSets = engine.getAllTrainedNetworkFiles(projectName)
-    availableTests = engine.getAllProjectTests(projectName)
+    availableTrainingDataSets = engine.getAllProjectDatasets(projectName)
 
     formAddTrainingFile = AddTrainingFileForm()
     formAddNetworkFile = AddNetworkFileForm()
-
-    formAddNetworkTest = AddNetworkTestForm()
-    formAddNetworkTest.setArhitecturesChoices(availableNetworkArhitectures, availableTrainedFiles)
 
     formAddNetworkTraining = AddNetworkTrainingForm()
     formAddNetworkTraining.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
 
     return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
-        formAddNetworkFile = formAddNetworkFile, formAddNetworkTest = formAddNetworkTest, formAddNetworkTraining = formAddNetworkTraining, 
-        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTests = availableTests)
+        formAddNetworkFile = formAddNetworkFile, formAddNetworkTraining = formAddNetworkTraining, 
+        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles)
 
 
 
@@ -115,8 +110,63 @@ def viewTest(projectName, testName):
 @app.route('/manageProjectDatasets/<string:projectName>')
 def manageProjectDatasets(projectName):
     isProjectOwner = engine.isProjectOwner(projectName)
-    availableDataSets = MultiDict([('a', 'b'), ('b', 'c')])
-    return render_template('manage_project_datasets.html', title = 'Gestionare dataseturi | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, availableDataSets = availableDataSets)
+    formAddPredefinedDatSet = AddPredefinedDatSetForm()
+    availableDataSets = engine.getAllProjectDatasets(projectName)
+    return render_template('manage_project_datasets.html', title = 'Gestionare dataseturi | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, availableDataSets = availableDataSets, formAddPredefinedDatSet = formAddPredefinedDatSet)
+
+
+
+@app.route('/addPredefinedDataSet/<string:projectName>', methods=['POST'])
+def addPredefinedDataSet(projectName):
+    redirectUrl = '/manageProjectDatasets/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    form = AddPredefinedDatSetForm()
+
+    if request.method == 'POST':
+        if form.validate() == False:
+            for fieldName, errorMessages in form.errors.iteritems():
+                for err in errorMessages:
+                    flash(err, 'danger')
+            return redirect(redirectUrl)
+        else:
+            datasetName = engine.cleanAlphanumericString(form.datasetName.data)
+            datasetNamePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName)
+            predefinedDataSetType = form.predefinedDataSetType.data
+
+            if engine.dirExists(datasetNamePath) == True:
+                flash('Exista deja un set de date cu acest nume!', 'warning')
+                return redirect(redirectUrl)
+
+            infoData = {}
+            if predefinedDataSetType == "MNIST":
+                infoData['trainingDataSource'] = 'MNIST_DATA_FILE'
+                infoData['targetDataSource'] = 'MNIST_DATA_FILE'
+            else:
+                flash('Setul predefinit nu este bun !', 'warning')
+                return redirect(redirectUrl)
+
+            engine.createDirectory(datasetNamePath)
+            trainDir = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "train")
+            engine.createDirectory(trainDir)
+            targetDir = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "target")
+            engine.createDirectory(targetDir)
+            infoDatasetFile = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "info.json")
+
+            if predefinedDataSetType == "MNIST":
+                predefinedTrainPath = os.path.join(os.getcwd(), app.config['PROJECT_PREDEFINED_DATASETS_FOLDER_NAME'], "mnist", "train", "train-images.idx3-ubyte")
+                predefinedTargetPath = os.path.join(os.getcwd(), app.config['PROJECT_PREDEFINED_DATASETS_FOLDER_NAME'], "mnist", "target", "train-labels.idx1-ubyte")
+                shutil.copyfile(predefinedTrainPath, os.path.join(trainDir, "train-images.idx3-ubyte"))
+                shutil.copyfile(predefinedTargetPath, os.path.join(targetDir, "train-labels.idx1-ubyte"))
+
+            with open(infoDatasetFile, 'w') as outfile:
+                json.dump(infoData, outfile)
+
+            flash('Setul de date a fost adaugat cu succes!', 'success')
+            return redirect(redirectUrl)
 
 
 
@@ -155,15 +205,15 @@ def addNetworkTest(projectName):
 
 @app.route('/addNetworkTraining/<string:projectName>', methods=['POST'])
 def addNetworkTraining(projectName):
-    redirectUrlFail = '/project/' + projectName
+    redirectUrl = '/project/' + projectName
 
     if engine.isProjectOwner(projectName) == False:
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
         return redirect(redirectUrlFail)
 
     availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
-    availableTrainingFiles = engine.getAllTriningFiles(projectname)
-    availableTrainingDataSets = engine.getAllTrainedNetworkFiles(projectName)
+    availableTrainingFiles = engine.getAllTriningFiles(projectName)
+    availableTrainingDataSets = engine.getAllProjectDatasets(projectName)
 
     form = AddNetworkTrainingForm()
     form.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
@@ -173,13 +223,11 @@ def addNetworkTraining(projectName):
             for fieldName, errorMessages in form.errors.iteritems():
                 for err in errorMessages:
                     flash(err, 'danger')
-            return redirect(redirectUrlFail)
+            return redirect(redirectUrl)
         else:
             # TODO: Add the logic
-            testName = engine.cleanAlphanumericString(form.testName.data)
-            redirectUrlSuccess = '/viewTest/' + projectName + '/' + testName
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
-            return redirect(redirectUrlSuccess)
+            return redirect(redirectUrl)
 
 
 
@@ -257,9 +305,13 @@ def deleteConfigFile(projectName, networkConfigFile):
         return redirect(redirectUrl)
 
     path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
-    os.remove(path)
+    if engine.fileExists(path) == True:
+        os.remove(path)
+    else:
+        flash('Fisierul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
 
-    flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    flash('Fisierul de configurare a fost sters cu succes!', 'success')
     return redirect(redirectUrl)
 
 
@@ -273,9 +325,13 @@ def deleteTrainingFile(projectName, trainingConfigFile):
         return redirect(redirectUrl)
 
     path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
-    os.remove(path)
+    if engine.fileExists(path) == True:
+        os.remove(path)
+    else:
+        flash('Fisierul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
 
-    flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    flash('Fisierul de configurare a fost sters cu succes!', 'success')
     return redirect(redirectUrl)
 
 
@@ -289,7 +345,30 @@ def deleteTest(projectName, testName):
         return redirect(redirectUrl)
 
     path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
-    shutil.rmtree(path, ignore_errors=True)
+    if engine.dirExists(path) == True:
+        shutil.rmtree(path, ignore_errors=True)
+    else:
+        flash('Testul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
 
-    flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+    flash('Fisierul de configurare a fost sters cu succes!', 'success')
+    return redirect(redirectUrl)
+
+
+@app.route('/deleteDataset/<string:projectName>/<string:datasetName>')
+def deleteDataset(projectName, datasetName):
+    redirectUrl = '/manageProjectDatasets/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName)
+    if engine.dirExists(path) == True:
+        shutil.rmtree(path, ignore_errors=True)
+    else:
+        flash('Setul de date nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
+
+    flash('Setul de date a fost sters cu succes!', 'success')
     return redirect(redirectUrl)
