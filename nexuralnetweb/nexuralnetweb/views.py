@@ -6,6 +6,7 @@ import engine
 import os
 import shutil
 import json
+import nexuralnet
 
 @app.route('/')
 @app.route('/home')
@@ -225,7 +226,52 @@ def addNetworkTraining(projectName):
                     flash(err, 'danger')
             return redirect(redirectUrl)
         else:
-            # TODO: Add the logic
+            trainingName = engine.cleanAlphanumericString(form.trainingName.data)
+            trainingPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName)
+
+            if engine.dirExists(trainingPath) == True:
+                flash('Exista deja un antrenament cu acest nume!', 'warning')
+                return redirect(redirectUrl)
+
+            outputTrainedDataFilePath = os.path.join(trainingPath, trainingName + ".json")
+            outputTrainerInfoFolderPath = os.path.join(trainingPath, "info")
+            engine.createDirectory(trainingPath)
+            engine.createDirectory(outputTrainerInfoFolderPath)
+
+            datasetName = engine.cleanAlphanumericString(form.trainingDataSet.data)
+            networkArhitecture = form.networkArhitecture.data
+            networkArhitecturePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkArhitecture)
+            trainingFile = form.trainingFile.data
+            trainingFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingFile)
+
+            if not engine.fileExists(networkArhitecturePath) == True or not engine.fileExists(trainingFilePath) == True:
+                flash('S-au detectat probleme la fisierele de configurare!', 'warning')
+                return redirect(redirectUrl)
+
+            infoDatasetFile = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "info.json")
+            with open(infoDatasetFile) as json_data:
+                d = json.load(json_data)
+                trainingDataSource = d['trainingDataSource']
+
+            if trainingDataSource == "MNIST_DATA_FILE":
+                trainDir = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "train")
+                targetDir = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "target")
+                dataPath = os.path.join(trainDir, "train-images.idx3-ubyte")
+                labelsPath = os.path.join(targetDir, "train-labels.idx1-ubyte")
+
+                if not engine.fileExists(dataPath) == True or not engine.fileExists(labelsPath) == True:
+                    flash('Setul de date este invalid!', 'warning')
+                    return redirect(redirectUrl)
+
+                trainingDataSource = nexuralnet.trainer.trainingDataSource.MNIST_DATA_FILE
+                targetDataSource = nexuralnet.trainer.targetDataSource.MNIST_DATA_FILE
+            else:
+                flash('Momentan doar setul de date MNIST este suportat!', 'warning')
+                return redirect(redirectUrl)
+
+            trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
+            trainer.train(dataPath, labelsPath, outputTrainedDataFilePath,outputTrainerInfoFolderPath, trainingDataSource, targetDataSource)
+
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)
 
