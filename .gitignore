@@ -11,7 +11,7 @@ _mailinglist
 .tox
 .cache/
 .idea/
-nexuralnetweb/projects
+nexuralnetweb/projects/*
 # Coverage reports
 htmlcov
 .coverage
