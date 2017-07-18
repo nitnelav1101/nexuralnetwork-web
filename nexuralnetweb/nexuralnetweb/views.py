@@ -77,6 +77,7 @@ def project(projectName):
     availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
     availableTrainingFiles = engine.getAllTriningFiles(projectName)
     availableTrainingDataSets = engine.getAllProjectDatasets(projectName)
+    availableTrainings = engine.getAllTrainings(projectName)
 
     formAddTrainingFile = AddTrainingFileForm()
     formAddNetworkFile = AddNetworkFileForm()
@@ -86,7 +87,7 @@ def project(projectName):
 
     return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
         formAddNetworkFile = formAddNetworkFile, formAddNetworkTraining = formAddNetworkTraining, 
-        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles)
+        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTrainings = availableTrainings)
 
 
 
@@ -234,7 +235,8 @@ def addNetworkTraining(projectName):
                 return redirect(redirectUrl)
 
             outputTrainedDataFilePath = os.path.join(trainingPath, trainingName + ".json")
-            outputTrainerInfoFolderPath = os.path.join(trainingPath, "info")
+            outputTrainerInfoFolderPath = os.path.join(trainingPath, "info/")
+            commandsDataFile = os.path.join(outputTrainerInfoFolderPath, "commands.json")
             engine.createDirectory(trainingPath)
             engine.createDirectory(outputTrainerInfoFolderPath)
 
@@ -269,8 +271,15 @@ def addNetworkTraining(projectName):
                 flash('Momentan doar setul de date MNIST este suportat!', 'warning')
                 return redirect(redirectUrl)
 
-            trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
-            trainer.train(dataPath, labelsPath, outputTrainedDataFilePath,outputTrainerInfoFolderPath, trainingDataSource, targetDataSource)
+            commandsData = {}
+            commandsData['server_command'] = 'train'
+            commandsData['network_command'] = 'train'
+
+            with open(commandsDataFile, 'w') as outfile:
+                json.dump(commandsData, outfile)
+
+            #trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
+            #trainer.train(dataPath, labelsPath, outputTrainedDataFilePath,outputTrainerInfoFolderPath, trainingDataSource, targetDataSource)
 
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)

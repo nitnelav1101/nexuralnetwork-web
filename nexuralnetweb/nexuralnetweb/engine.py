@@ -45,10 +45,10 @@ def getAllTestFilters(projectName, testName):
 		dic.append(os.path.basename(x))
 	return dic
 
-def getAllTrainedNetworkFiles(projectName):
-	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINED_NETWORK_FILES_FOLDER_NAME'])) if fnmatch.fnmatch(f, '*.json')]
+def getAllTrainings(projectName):
+	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
 	dic = MultiDict()
-	for x in files:
+	for x in dirs:
 		dic.add(os.path.basename(x), os.path.basename(x))
 	return dic
 
