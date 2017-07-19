@@ -182,9 +182,9 @@
                             <tr>
                                 <td> {{ training }}</td>
                                 <td class="text-right"> 
-                                    <a href="" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Deschide</a>
+                                    <a href="{{ url_for('viewTraining', projectName = projectName, trainingName = training) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</a>
                                     {% if isProjectOwner == True %}
-                                        <a href="" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                        <a href="{{ url_for('deleteTraining', projectName = projectName, trainingName = training) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
                                     {% endif %}
                                 </td>
                             </tr>          

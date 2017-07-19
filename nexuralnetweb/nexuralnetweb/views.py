@@ -7,6 +7,7 @@ import os
 import shutil
 import json
 import nexuralnet
+import threading
 
 @app.route('/')
 @app.route('/home')
@@ -237,6 +238,7 @@ def addNetworkTraining(projectName):
             outputTrainedDataFilePath = os.path.join(trainingPath, trainingName + ".json")
             outputTrainerInfoFolderPath = os.path.join(trainingPath, "info/")
             commandsDataFile = os.path.join(outputTrainerInfoFolderPath, "commands.json")
+            infoDataFile = os.path.join(trainingPath, "info.json")
             engine.createDirectory(trainingPath)
             engine.createDirectory(outputTrainerInfoFolderPath)
 
@@ -278,11 +280,48 @@ def addNetworkTraining(projectName):
             with open(commandsDataFile, 'w') as outfile:
                 json.dump(commandsData, outfile)
 
-            #trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
-            #trainer.train(dataPath, labelsPath, outputTrainedDataFilePath,outputTrainerInfoFolderPath, trainingDataSource, targetDataSource)
+            infoData = {}
+            infoData['network_file'] = networkArhitecture
+            infoData['training_file'] = trainingFile
+            infoData['dataset'] = datasetName
+
+            with open(infoDataFile, 'w') as outfile:
+                json.dump(infoData, outfile)
+
+            thread = threading.Thread(name='train_query', target=trainQuery, kwargs={'networkArhitecturePath': networkArhitecturePath,
+                'trainingFilePath': trainingFilePath, 'dataPath': dataPath, 'labelsPath': labelsPath, 'outputTrainedDataFilePath': outputTrainedDataFilePath,
+                'outputTrainerInfoFolderPath': outputTrainerInfoFolderPath, 'trainingDataSource': trainingDataSource, 'targetDataSource': targetDataSource})
+            thread.setDaemon(True)
+            thread.start()
 
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)
+
+
+
+def trainQuery(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDataSource, targetDataSource):
+    trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
+    trainer.train(dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDataSource, targetDataSource)
+
+@app.route('/viewTraining/<string:projectName>/<string:trainingName>')
+def viewTraining(projectName, trainingName):
+    isProjectOwner = engine.isProjectOwner(projectName)
+    trainingStatus = engine.getTrainingStatus(projectName, trainingName)
+    trainedFileExists =  engine.trainedFileExists(projectName, trainingName)
+    formAddNetworkTest = AddNetworkTestForm()
+
+    infoTrainingDataPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info.json")
+    infoTrainingData = {}
+    with open(infoTrainingDataPath) as json_data:
+        d = json.load(json_data)
+        infoTrainingData['network_file'] = d['network_file']
+        infoTrainingData['training_file'] = d['training_file']
+        infoTrainingData['dataset'] = d['dataset']
+
+    formAddNetworkTest.networkArhitecture.data = infoTrainingData['network_file']
+    formAddNetworkTest.trainedFile.data = infoTrainingData['training_file']
+    return render_template('view_training.html', title = 'Vizualizare antrenament | neXuralNet Project', projectName = projectName, trainingName = trainingName, 
+        isProjectOwner = isProjectOwner, trainingStatus = trainingStatus, trainedFileExists = trainedFileExists, formAddNetworkTest = formAddNetworkTest, infoTrainingData = infoTrainingData)
 
 
 
@@ -426,4 +465,23 @@ def deleteDataset(projectName, datasetName):
         return redirect(redirectUrl)
 
     flash('Setul de date a fost sters cu succes!', 'success')
+    return redirect(redirectUrl)
+
+
+@app.route('/deleteTraining/<string:projectName>/<string:trainingName>')
+def deleteTraining(projectName, trainingName):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName)
+    if engine.dirExists(path) == True:
+        shutil.rmtree(path, ignore_errors=True)
+    else:
+        flash('Antrenamentul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
+
+    flash('Antrenamentul a fost sters cu succes!', 'success')
     return redirect(redirectUrl)

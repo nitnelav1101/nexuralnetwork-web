@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+.or_option{
+    font-size: 14px;
+    color: #008ed6;
+    text-transform: uppercase;
+    margin-top: 65px;
+    font-weight: 700;
+}
+</style>
+
+<div class="col-xs-12 col-sm-12 col-md-12">
+	<div class="page-header">
+    {% if isProjectOwner == True %}
+      <h1><i class="fa fa-cogs"></i> Gestionați antrenamentul <small>{{ trainingName }}</small></h1>
+    {% else %}
+      <h1><i class="fa fa-cogs"></i> Vizualizați antrenamentul <small>{{ trainingName }}</small></h1>
+    {% endif %}
+	</div>
+
+    <div class="row">
+        <ol class="breadcrumb bread-primary">
+            <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
+            {% if isProjectOwner == True %}
+            <li class="active"><a href="{{ url_for('project', projectName = projectName) }}">GESTIONARE PROIECT</a></li>
+            <li class="active">GESTIONATI ANTRENAMENTUL {{ trainingName }}</li>
+            {% else %}
+            <li class="active"><a href="{{ url_for('project', projectName = projectName) }}">VIZUALIZARE PROIECT</a></li>
+            <li class="active">VIZUALIZARE ANTRENAMENTUL {{ trainingName }}</li>
+            {% endif %}
+     
+        </ol>
+    </div>
+
+        {% if isProjectOwner == True %}
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un test nou</button>
+        {% else %}
+        <div class="alert alert-danger">
+          <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
+        </div>
+        <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a>
+        {% endif %}
+
+  <div style="clear:both"></div><br>
+
+
+
+</div>
+
+<br><div style="clear:both"></div><br>
+
+<!-- Modal add test -->
+<div class="modal fade" id="formAddNetworkTestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adaugă un test nou</h4>
+    </div>
+    <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
+      {{ formAddNetworkTest.hidden_tag() }}
+      <div class="modal-body">
+       <div class="row">
+                <div class="col-md-12">
+                    {{ formAddNetworkTest.testName.label }} <br>
+                    {{ formAddNetworkTest.testName(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.networkArhitecture.label }} <br>
+                    {{ formAddNetworkTest.networkArhitecture(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.trainedFile.label }} <br>
+                    {{ formAddNetworkTest.trainedFile(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.imageFile.label }} <br>
+                    {{ formAddNetworkTest.imageFile(class_="form-control") }} <br>
+                </div>
+
+                <div class="col-md-6">
+                    {{ formAddNetworkTest.readType.label }} <br>
+                    {{ formAddNetworkTest.readType(class_="form-control") }} <br>
+                </div>
+            </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+        {{ formAddNetworkTest.submit(id_="button", class_="btn btn-primary") }}
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+
+{% endblock %}

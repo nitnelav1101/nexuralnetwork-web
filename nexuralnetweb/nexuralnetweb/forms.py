@@ -26,8 +26,8 @@ class AddNetworkFileForm(FlaskForm):
 
 class AddNetworkTestForm(FlaskForm):
 	testName = TextField("Nume test:", [validators.Required(message='Va rugam sa alegeti un nume sugestiv pentru acest test.')])
-	networkArhitecture = SelectField('Arhitectura retelei:', [validators.Required()], choices = [])
-	trainedFile = SelectField('Antrenament:', [validators.Required()], choices = [])
+	networkArhitecture = TextField('Arhitectura retelei:', [validators.Required()])
+	trainedFile = TextField('Antrenament:', [validators.Required()])
 	imageFile = FileField("Imagine:", validators=[FileRequired(), FileAllowed(['jpg', 'jpeg', 'png', 'bmp'], 'Sunt acceptate doar fisirele de tip imagine!')])
 	readType = SelectField('Mod citire imagine:', [validators.Required()], choices = [('0', '1 canal'), ('1', '3 canale')])
 	submit = SubmitField("Trimite")

@@ -162,3 +162,11 @@ def getResult(projectName, testName):
 
 def cleanAlphanumericString(content):
 	return re.sub(r'\W+', '', content)
+
+
+def getTrainingStatus(projectName, trainingName):
+	return 'train'
+
+
+def trainedFileExists(projectName, trainingName):
+	return False
