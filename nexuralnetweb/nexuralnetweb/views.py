@@ -8,6 +8,7 @@ import shutil
 import json
 import nexuralnet
 import threading
+import nexuralnetengine
 
 @app.route('/')
 @app.route('/home')
@@ -318,10 +319,13 @@ def viewTraining(projectName, trainingName):
         infoTrainingData['training_file'] = d['training_file']
         infoTrainingData['dataset'] = d['dataset']
 
+    trainingStats, validationStats = nexuralnetengine.getTrainingStats(projectName, trainingName)
+
     formAddNetworkTest.networkArhitecture.data = infoTrainingData['network_file']
     formAddNetworkTest.trainedFile.data = infoTrainingData['training_file']
     return render_template('view_training.html', title = 'Vizualizare antrenament | neXuralNet Project', projectName = projectName, trainingName = trainingName, 
-        isProjectOwner = isProjectOwner, trainingStatus = trainingStatus, trainedFileExists = trainedFileExists, formAddNetworkTest = formAddNetworkTest, infoTrainingData = infoTrainingData)
+        isProjectOwner = isProjectOwner, trainingStatus = trainingStatus, trainedFileExists = trainedFileExists, formAddNetworkTest = formAddNetworkTest, infoTrainingData = infoTrainingData,
+        trainingStats = trainingStats, validationStats = validationStats)
 
 
 

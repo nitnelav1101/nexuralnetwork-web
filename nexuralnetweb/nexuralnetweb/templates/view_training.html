@@ -45,7 +45,40 @@
 
   <div style="clear:both"></div><br>
 
+  <div class="row">
 
+  <div class="col-md-4">
+
+                </div>
+                <div class="col-md-4">
+<h3>Statistici pe setul de antrenament</h3>
+                <b>Statistici pentru clasa:</b> <select name="classNum">
+  {% for i in range(0, trainingStats|length) %}
+  <option value="{{ i }}">{{ i }}</option>
+{% endfor %}
+</select><br>
+                <b>Recall:</b> {{ trainingStats[0]['recall'] }} <br>
+  <b>Precision:</b> {{ trainingStats[0]['precision'] }} <br>
+  <b>F1 score:</b> {{ trainingStats[0]['f1score'] }} <br>
+                </div>
+
+                <div class="col-md-4">
+                <h3>Statistici pe setul de validare</h3>
+                                <b>Statistici pentru clasa:</b> <select name="classNum">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+</select><br>
+                <b>Recall:</b> {{ validationStats[0]['recall'] }} <br>
+  <b>Precision:</b> {{ validationStats[0]['precision'] }} <br>
+  <b>F1 score:</b> {{ validationStats[0]['f1score'] }} <br>
+
+                </div>
+
+                
+
+
+  
 
 </div>
 
