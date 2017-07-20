@@ -13,6 +13,10 @@ def getTrainingStats(projectName, trainingName):
 
 	trainingStats = []
 	validationStats = []
+	trainingInfo = {}
+	trainingInfo['result_type'] = data['result_type']
+	trainingInfo['stop_condition'] = data['stop_condition']
+	trainingInfo['epochs_num'] = str(len(data['epochs'].items()) - 1)
 
 	validationConfusionMatrix = data['epochs']['epoch' + str(len(data['epochs'].items()) - 1)]['validation_confusion_matrix']
 	validationConfusionMatrixNP = np.array([d for d in validationConfusionMatrix])
@@ -42,7 +46,7 @@ def getTrainingStats(projectName, trainingName):
 		stats['f1score'] = str(f1score)
 		validationStats.append(stats)
 
-	return trainingStats, validationStats
+	return trainingStats, validationStats, trainingInfo
 
 def getInitialWeightsHistogram():
 	return ''

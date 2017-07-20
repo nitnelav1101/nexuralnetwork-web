@@ -9,6 +9,9 @@ import json
 import nexuralnet
 import threading
 import nexuralnetengine
+import StringIO
+import base64
+import matplotlib.pyplot as plt
 
 @app.route('/')
 @app.route('/home')
@@ -319,13 +322,32 @@ def viewTraining(projectName, trainingName):
         infoTrainingData['training_file'] = d['training_file']
         infoTrainingData['dataset'] = d['dataset']
 
-    trainingStats, validationStats = nexuralnetengine.getTrainingStats(projectName, trainingName)
+    trainingStats, validationStats, trainingInfo = nexuralnetengine.getTrainingStats(projectName, trainingName)
+
+    img = StringIO.StringIO()
+
+    data = json.load(open(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info", "trainerInfo.json")))
+    learning_rate_data = []
+    epoch_mean_error_data = []
+    validation_mean_error = []
+
+    for x in range(0, int(trainingInfo['epochs_num'])):
+    	learning_rate_data.append(float(data['epochs']['epoch' + str(x)]['learning_rate']))
+    	epoch_mean_error_data.append(float(data['epochs']['epoch' + str(x)]['training_mean_error']))
+    	validation_mean_error.append(float(data['epochs']['epoch' + str(x)]['validation_mean_error']))
+
+    plt.plot(learning_rate_data)
+    plt.ylabel('Learning rate')
+    plt.savefig(img, format='png')
+    img.seek(0)
+
+    plot_url = base64.b64encode(img.getvalue())
 
     formAddNetworkTest.networkArhitecture.data = infoTrainingData['network_file']
     formAddNetworkTest.trainedFile.data = infoTrainingData['training_file']
     return render_template('view_training.html', title = 'Vizualizare antrenament | neXuralNet Project', projectName = projectName, trainingName = trainingName, 
         isProjectOwner = isProjectOwner, trainingStatus = trainingStatus, trainedFileExists = trainedFileExists, formAddNetworkTest = formAddNetworkTest, infoTrainingData = infoTrainingData,
-        trainingStats = trainingStats, validationStats = validationStats)
+        trainingStats = trainingStats, validationStats = validationStats, trainingInfo = trainingInfo, plot_url=plot_url)
 
 
 

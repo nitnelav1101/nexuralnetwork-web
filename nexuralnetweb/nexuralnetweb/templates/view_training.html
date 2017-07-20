@@ -35,7 +35,6 @@
     </div>
 
         {% if isProjectOwner == True %}
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un test nou</button>
         {% else %}
         <div class="alert alert-danger">
           <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
@@ -48,9 +47,25 @@
   <div class="row">
 
   <div class="col-md-4">
-
+  <b>Status:</b> antrenament complet<br>
+  <b>Tip problemă rezolvată:</b> clasificare multiplă<br>
+  <b>Număr de epoci:</b> {{ trainingInfo['epochs_num'] }}<br>
+  <b>Oprire antrenament:</b> a fost atinsă limita maximă a ratei de învățare<br>
                 </div>
-                <div class="col-md-4">
+
+<div class="col-md-8">
+                <div class="col-md-9">
+                    <img src="data:image/png;base64, {{ plot_url }}" style="width: 600px; height: auto;">
+                </div>
+
+                <div style="clear:both"></div>
+
+                <div class="col-md-9">
+
+                </div>      
+</div>
+
+  <div class="col-md-5">
 <h3>Statistici pe setul de antrenament</h3>
                 <b>Statistici pentru clasa:</b> <select name="classNum">
   {% for i in range(0, trainingStats|length) %}
@@ -62,12 +77,12 @@
   <b>F1 score:</b> {{ trainingStats[0]['f1score'] }} <br>
                 </div>
 
-                <div class="col-md-4">
+      <div class="col-md-5">
                 <h3>Statistici pe setul de validare</h3>
                                 <b>Statistici pentru clasa:</b> <select name="classNum">
-  <option value="0">0</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
+{% for i in range(0, validationStats|length) %}
+  <option value="{{ i }}">{{ i }}</option>
+{% endfor %}
 </select><br>
                 <b>Recall:</b> {{ validationStats[0]['recall'] }} <br>
   <b>Precision:</b> {{ validationStats[0]['precision'] }} <br>
@@ -75,12 +90,36 @@
 
                 </div>
 
-                
-
-
-  
-
 </div>
+
+<br><hr>
+{% if isProjectOwner == True %}
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un test nou</button>
+        {% endif %}
+
+<table class="table table-striped">
+                    <thead>
+                        <tr>
+                         <th>Nume test</th>
+                         <th class="text-right"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% if availableTests|length == 0 %}
+                        <tr><td>nu sunt teste disponibile</td></tr>
+                        {% endif %}
+
+                        {% for test in availableTests %}
+                            <tr>
+                                <td> {{ test }}</td>
+                                <td class="text-right"> 
+                                    <a href="{{ url_for('viewTest', projectName = projectName, testName = test) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Deschide</a>
+                                    <a href="{{ url_for('deleteTest', projectName = projectName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                </td>
+                            </tr>          
+                        {% endfor %}
+                    </tbody>
+                </table>
 
 <br><div style="clear:both"></div><br>
 
