@@ -337,7 +337,7 @@ def viewTraining(projectName, trainingName):
     	validation_mean_error.append(float(data['epochs']['epoch' + str(x)]['validation_mean_error']))
 
     plt.plot(learning_rate_data)
-    plt.ylabel('Learning rate')
+    plt.xlabel('Graficul ratei de invatare')
     plt.savefig(img, format='png')
     img.seek(0)
 
