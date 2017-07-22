@@ -12,6 +12,7 @@ import nexuralnetengine
 import StringIO
 import base64
 import matplotlib.pyplot as plt
+from nexuralnetweb import celery
 
 @app.route('/')
 @app.route('/home')
@@ -259,9 +260,9 @@ def addNetworkTraining(projectName):
             infoDatasetFile = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "info.json")
             with open(infoDatasetFile) as json_data:
                 d = json.load(json_data)
-                trainingDataSource = d['trainingDataSource']
+                trainingDS = d['trainingDataSource']
 
-            if trainingDataSource == "MNIST_DATA_FILE":
+            if trainingDS == "MNIST_DATA_FILE":
                 trainDir = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "train")
                 targetDir = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName, "target")
                 dataPath = os.path.join(trainDir, "train-images.idx3-ubyte")
@@ -292,20 +293,19 @@ def addNetworkTraining(projectName):
             with open(infoDataFile, 'w') as outfile:
                 json.dump(infoData, outfile)
 
-            thread = threading.Thread(name='train_query', target=trainQuery, kwargs={'networkArhitecturePath': networkArhitecturePath,
-                'trainingFilePath': trainingFilePath, 'dataPath': dataPath, 'labelsPath': labelsPath, 'outputTrainedDataFilePath': outputTrainedDataFilePath,
-                'outputTrainerInfoFolderPath': outputTrainerInfoFolderPath, 'trainingDataSource': trainingDataSource, 'targetDataSource': targetDataSource})
-            thread.setDaemon(True)
-            thread.start()
-
+            result = trainQuery.delay(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDS, trainingDS)
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)
 
-
-
+@celery.task()
 def trainQuery(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDataSource, targetDataSource):
-    trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
-    trainer.train(dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDataSource, targetDataSource)
+	print 'Started training...'
+	if trainingDataSource == "MNIST_DATA_FILE":
+		internalTrainingDataSource = nexuralnet.trainer.trainingDataSource.MNIST_DATA_FILE
+		internalTargetDataSource = nexuralnet.trainer.targetDataSource.MNIST_DATA_FILE
+	trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
+	trainer.train(dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, internalTrainingDataSource, internalTargetDataSource)
+	print 'Finished training.'
 
 @app.route('/viewTraining/<string:projectName>/<string:trainingName>')
 def viewTraining(projectName, trainingName):
