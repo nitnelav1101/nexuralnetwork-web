@@ -1,9 +1,10 @@
 import nexuralnet
 from nexuralnetweb import app
+import numpy as np
 import cv2
 import os
 import json
-import numpy as np
+
 
 def getTrainingStats(projectName, trainingName):
 	dataInfoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info/trainerInfo.json")

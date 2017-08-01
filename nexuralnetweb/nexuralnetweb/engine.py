@@ -2,7 +2,6 @@ from flask import session
 from nexuralnetweb import app
 import os
 import fnmatch
-import glob
 from werkzeug.utils import secure_filename, MultiDict
 import nexuralnetengine
 import json
