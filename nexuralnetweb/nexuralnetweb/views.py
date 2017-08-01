@@ -9,21 +9,21 @@ import json
 import nexuralnet
 import threading
 import nexuralnetengine
-import StringIO
-import base64
-import matplotlib.pyplot as plt
 from nexuralnetweb import celery
 
+
+# -------------------------------------------------------------------------------------
+#### Home page
+# -------------------------------------------------------------------------------------
 @app.route('/')
 @app.route('/home')
 def home():
-    return render_template(
-        'index.html',
-        title = 'neXuralNet Project'
-    )
+    return render_template('index.html', title = 'neXuralNet Project')
 
 
-
+# -------------------------------------------------------------------------------------
+#### Manage projects pages
+# -------------------------------------------------------------------------------------
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     form = CreateProjectForm()
@@ -46,6 +46,26 @@ def dashboard():
                 return render_template('dashboard.html', title = 'Panou de control | neXuralNet Project', form = form, existingProjects = existingProjects)
     elif request.method == 'GET':
         return render_template('dashboard.html', title = 'Panou de control | neXuralNet Project', form = form, existingProjects = existingProjects)
+
+
+
+@app.route('/project/<string:projectName>')
+def project(projectName):
+    isProjectOwner = engine.isProjectOwner(projectName)
+    availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
+    availableTrainingFiles = engine.getAllTriningFiles(projectName)
+    availableTrainingDataSets = engine.getAllProjectDatasets(projectName)
+    availableTrainings = engine.getAllTrainings(projectName)
+
+    formAddTrainingFile = AddTrainingFileForm()
+    formAddNetworkFile = AddNetworkFileForm()
+
+    formAddNetworkTraining = AddNetworkTrainingForm()
+    formAddNetworkTraining.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
+
+    return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
+        formAddNetworkFile = formAddNetworkFile, formAddNetworkTraining = formAddNetworkTraining, 
+        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTrainings = availableTrainings)
 
 
 
@@ -77,23 +97,110 @@ def secureProject(projectName):
 
 
 
-@app.route('/project/<string:projectName>')
-def project(projectName):
-    isProjectOwner = engine.isProjectOwner(projectName)
-    availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
-    availableTrainingFiles = engine.getAllTriningFiles(projectName)
-    availableTrainingDataSets = engine.getAllProjectDatasets(projectName)
-    availableTrainings = engine.getAllTrainings(projectName)
+@app.route('/downloadExampleFile/<string:filename>')
+def downloadExampleFile(filename):
+    filePath = os.path.join('..', app.config['GENERAL_FILES_FOLDER_NAME'], filename)
+    return send_file(filePath)
 
-    formAddTrainingFile = AddTrainingFileForm()
-    formAddNetworkFile = AddNetworkFileForm()
 
-    formAddNetworkTraining = AddNetworkTrainingForm()
-    formAddNetworkTraining.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
 
-    return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
-        formAddNetworkFile = formAddNetworkFile, formAddNetworkTraining = formAddNetworkTraining, 
-        availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTrainings = availableTrainings)
+
+@app.route('/AddNetworkFile/<string:projectName>', methods=['POST'])
+def addNetworkFile(projectName):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    form = AddNetworkFileForm()
+    if request.method == 'POST':
+        if form.validate() == False:
+            for fieldName, errorMessages in form.errors.iteritems():
+                for err in errorMessages:
+                    flash(err, 'danger')
+        else:
+            f = form.networkFile.data
+            filename = secure_filename(f.filename)
+            networkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])
+            engine.createDirectory(networkFilesDirectory)
+            fileSave = os.path.join(networkFilesDirectory, filename)
+            if engine.fileExists(fileSave) == True:
+                flash('Exista deja un fisier de configurare cu acest nume!', 'warning')
+                return redirect(redirectUrl)
+            f.save(fileSave)
+            flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
+        return redirect(redirectUrl)
+
+
+
+@app.route('/AddTrainingFile/<string:projectName>', methods=['POST'])
+def addTrainingFile(projectName):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    form = AddTrainingFileForm()
+    if request.method == 'POST':
+        if form.validate() == False:
+            for fieldName, errorMessages in form.errors.iteritems():
+                for err in errorMessages:
+                    flash(err, 'danger')
+        else:
+            f = form.trainingFile.data
+            filename = secure_filename(f.filename)
+            trainingFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'])
+            engine.createDirectory(trainingFilesDirectory)
+            fileSave = os.path.join(trainingFilesDirectory, filename)
+            if engine.fileExists(fileSave):
+                flash('Exista deja un fisier de configurare cu acest nume!', 'warning')
+                return redirect(redirectUrl)
+            f.save(fileSave)
+            flash('Fisierul de antrenament a fost adaugat cu succes!', 'success')
+        return redirect(redirectUrl)
+
+
+
+@app.route('/deleteConfigFile/<string:projectName>/<string:networkConfigFile>')
+def deleteConfigFile(projectName, networkConfigFile):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
+    if engine.fileExists(path) == True:
+        os.remove(path)
+    else:
+        flash('Fisierul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
+
+    flash('Fisierul de configurare a fost sters cu succes!', 'success')
+    return redirect(redirectUrl)
+
+
+
+@app.route('/deleteTrainingFile/<string:projectName>/<string:trainingConfigFile>')
+def deleteTrainingFile(projectName, trainingConfigFile):
+    redirectUrl = '/project/' + projectName
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
+    if engine.fileExists(path) == True:
+        os.remove(path)
+    else:
+        flash('Fisierul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
+
+    flash('Fisierul de configurare a fost sters cu succes!', 'success')
+    return redirect(redirectUrl)
+
 
 
 
@@ -178,36 +285,32 @@ def addPredefinedDataSet(projectName):
 
 
 
-@app.route('/addNetworkTest/<string:projectName>', methods=['POST'])
-def addNetworkTest(projectName):
-    redirectUrlFail = '/project/' + projectName
+@app.route('/addNetworkTest/<string:projectName>/<string:trainingName>', methods=['POST'])
+def addNetworkTest(projectName, trainingName):
+    redirectUrl = '/viewTraining/' + projectName + "/" + trainingName
 
     if engine.isProjectOwner(projectName) == False:
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
-        return redirect(redirectUrlFail)
+        return redirect(redirectUrl)
 
-    availableTrainedFiles = engine.getAllTrainedNetworkFiles(projectName)
-    availableNetworkArhitectures = engine.getAllNetworkArhitecturesFiles(projectName)
     form = AddNetworkTestForm()
-    form.setArhitecturesChoices(availableNetworkArhitectures, availableTrainedFiles)
 
     if request.method == 'POST':
         if form.validate() == False:
             for fieldName, errorMessages in form.errors.iteritems():
                 for err in errorMessages:
                     flash(err, 'danger')
-            return redirect(redirectUrlFail)
+            return redirect(redirectUrl)
         else:
             testName = engine.cleanAlphanumericString(form.testName.data)
-            testDir = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+            testDir = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
             if engine.dirExists(testDir) == True:
                 flash('Exista un test cu acest nume!', 'danger')
-                return redirect(redirectUrlFail)
+                return redirect(redirectUrl)
             else:
-                engine.addTest(projectName, testName, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
-                redirectUrlSuccess = '/viewTest/' + projectName + '/' + testName
+                engine.addTest(projectName, trainingName, testName, form.networkArhitecture.data, form.trainedFile.data, form.imageFile.data, form.readType.data)
                 flash('Testul a fost adaugat cu succes!', 'success')
-                return redirect(redirectUrlSuccess)
+                return redirect(redirectUrl)
 
 
 
@@ -297,6 +400,7 @@ def addNetworkTraining(projectName):
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)
 
+
 @celery.task()
 def trainQuery(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDataSource, targetDataSource):
 	print 'Started training...'
@@ -307,6 +411,7 @@ def trainQuery(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, o
 	trainer.train(dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, internalTrainingDataSource, internalTargetDataSource)
 	print 'Finished training.'
 
+
 @app.route('/viewTraining/<string:projectName>/<string:trainingName>')
 def viewTraining(projectName, trainingName):
     isProjectOwner = engine.isProjectOwner(projectName)
@@ -316,15 +421,26 @@ def viewTraining(projectName, trainingName):
 
     infoTrainingDataPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info.json")
     infoTrainingData = {}
-    with open(infoTrainingDataPath) as json_data:
-        d = json.load(json_data)
+    with open(infoTrainingDataPath) as jsonData:
+        d = json.load(jsonData)
         infoTrainingData['network_file'] = d['network_file']
         infoTrainingData['training_file'] = d['training_file']
         infoTrainingData['dataset'] = d['dataset']
 
-    trainingStats, validationStats, trainingInfo = nexuralnetengine.getTrainingStats(projectName, trainingName)
+    trainingConfigData = {}
+    trainingConfigFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], infoTrainingData['training_file'])
+    with open(trainingConfigFilePath) as jsonData:
+        d = json.load(jsonData)
+        trainingConfigData['max_num_epochs'] = d['trainer_settings']['max_num_epochs']
+        trainingConfigData['autosave_training_num_epochs'] = d['trainer_settings']['autosave_training_num_epochs']
+        trainingConfigData['min_learning_rate_threshold'] = d['trainer_settings']['min_learning_rate_threshold']
+        trainingConfigData['min_validation_error_threshold'] = d['trainer_settings']['min_validation_error_threshold']
+        trainingConfigData['training_dataset_percentage'] = d['trainer_settings']['training_dataset_percentage']
+        trainingConfigData['algorithm'] = d['solver']['algorithm']
+        trainingConfigData['learning_rate'] = d['solver']['learning_rate']
+        trainingConfigData['weight_decay'] = d['solver']['weight_decay']
 
-    img = StringIO.StringIO()
+    trainingStats, validationStats, trainingInfo = nexuralnetengine.getTrainingStats(projectName, trainingName)
 
     data = json.load(open(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info", "trainerInfo.json")))
     learning_rate_data = []
@@ -336,135 +452,32 @@ def viewTraining(projectName, trainingName):
     	epoch_mean_error_data.append(float(data['epochs']['epoch' + str(x)]['training_mean_error']))
     	validation_mean_error.append(float(data['epochs']['epoch' + str(x)]['validation_mean_error']))
 
-    plt.plot(learning_rate_data)
-    plt.xlabel('Graficul ratei de invatare')
-    plt.savefig(img, format='png')
-    img.seek(0)
-
-    plot_url = base64.b64encode(img.getvalue())
+    plot_learning_rate_data = engine.getPlotFromData(learning_rate_data, 'Graficul ratei de invatare')
+    plot_epoch_mean_error_data = engine.getPlotFromData(epoch_mean_error_data, 'Grafic eroare medie antrenament')
+    plot_validation_mean_error = engine.getPlotFromData(validation_mean_error, 'Grafic eroare medie validare')
 
     formAddNetworkTest.networkArhitecture.data = infoTrainingData['network_file']
     formAddNetworkTest.trainedFile.data = infoTrainingData['training_file']
+
+    availableTests = engine.getAllProjectTests(projectName, trainingName)
+
     return render_template('view_training.html', title = 'Vizualizare antrenament | neXuralNet Project', projectName = projectName, trainingName = trainingName, 
         isProjectOwner = isProjectOwner, trainingStatus = trainingStatus, trainedFileExists = trainedFileExists, formAddNetworkTest = formAddNetworkTest, infoTrainingData = infoTrainingData,
-        trainingStats = trainingStats, validationStats = validationStats, trainingInfo = trainingInfo, plot_url=plot_url)
+        trainingStats = trainingStats, validationStats = validationStats, trainingInfo = trainingInfo, availableTests = availableTests,
+        plot_learning_rate_data = plot_learning_rate_data, plot_epoch_mean_error_data = plot_epoch_mean_error_data, plot_validation_mean_error = plot_validation_mean_error, trainingConfigData = trainingConfigData)
 
 
 
 
-@app.route('/AddNetworkFile/<string:projectName>', methods=['POST'])
-def addNetworkFile(projectName):
-    redirectUrl = '/project/' + projectName
-
-    if engine.isProjectOwner(projectName) == False:
-        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
-        return redirect(redirectUrl)
-
-    form = AddNetworkFileForm()
-    if request.method == 'POST':
-        if form.validate() == False:
-            for fieldName, errorMessages in form.errors.iteritems():
-                for err in errorMessages:
-                    flash(err, 'danger')
-        else:
-            f = form.networkFile.data
-            filename = secure_filename(f.filename)
-            networkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])
-            engine.createDirectory(networkFilesDirectory)
-            fileSave = os.path.join(networkFilesDirectory, filename)
-            if engine.fileExists(fileSave) == True:
-            	flash('Exista deja un fisier de configurare cu acest nume!', 'warning')
-            	return redirect(redirectUrl)
-            f.save(fileSave)
-            flash('Fisierul de configurare a fost adaugat cu succes!', 'success')
-        return redirect(redirectUrl)
-
-
-
-@app.route('/AddTrainingFile/<string:projectName>', methods=['POST'])
-def addTrainingFile(projectName):
-    redirectUrl = '/project/' + projectName
+@app.route('/deleteTest/<string:projectName>/<string:trainingName>/<string:testName>')
+def deleteTest(projectName, trainingName, testName):
+    redirectUrl = '/viewTraining/' + projectName + "/" + trainingName
 
     if engine.isProjectOwner(projectName) == False:
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
         return redirect(redirectUrl)
 
-    form = AddTrainingFileForm()
-    if request.method == 'POST':
-        if form.validate() == False:
-            for fieldName, errorMessages in form.errors.iteritems():
-                for err in errorMessages:
-                    flash(err, 'danger')
-        else:
-            f = form.trainingFile.data
-            filename = secure_filename(f.filename)
-            trainingFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'])
-            engine.createDirectory(trainingFilesDirectory)
-            fileSave = os.path.join(trainingFilesDirectory, filename)
-            if engine.fileExists(fileSave):
-                flash('Exista deja un fisier de configurare cu acest nume!', 'warning')
-                return redirect(redirectUrl)
-            f.save(fileSave)
-            flash('Fisierul de antrenament a fost adaugat cu succes!', 'success')
-        return redirect(redirectUrl)
-
-
-
-@app.route('/downloadExampleFile/<string:filename>')
-def downloadExampleFile(filename):
-    filePath = os.path.join('..', app.config['GENERAL_FILES_FOLDER_NAME'], filename)
-    return send_file(filePath)
-
-
-@app.route('/deleteConfigFile/<string:projectName>/<string:networkConfigFile>')
-def deleteConfigFile(projectName, networkConfigFile):
-    redirectUrl = '/project/' + projectName
-
-    if engine.isProjectOwner(projectName) == False:
-        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
-        return redirect(redirectUrl)
-
-    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
-    if engine.fileExists(path) == True:
-        os.remove(path)
-    else:
-        flash('Fisierul nu exista sau nu a putut fi sters!', 'warning')
-        return redirect(redirectUrl)
-
-    flash('Fisierul de configurare a fost sters cu succes!', 'success')
-    return redirect(redirectUrl)
-
-
-
-@app.route('/deleteTrainingFile/<string:projectName>/<string:trainingConfigFile>')
-def deleteTrainingFile(projectName, trainingConfigFile):
-    redirectUrl = '/project/' + projectName
-
-    if engine.isProjectOwner(projectName) == False:
-        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
-        return redirect(redirectUrl)
-
-    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
-    if engine.fileExists(path) == True:
-        os.remove(path)
-    else:
-        flash('Fisierul nu exista sau nu a putut fi sters!', 'warning')
-        return redirect(redirectUrl)
-
-    flash('Fisierul de configurare a fost sters cu succes!', 'success')
-    return redirect(redirectUrl)
-
-
-
-@app.route('/deleteTest/<string:projectName>/<string:testName>')
-def deleteTest(projectName, testName):
-    redirectUrl = '/project/' + projectName
-
-    if engine.isProjectOwner(projectName) == False:
-        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
-        return redirect(redirectUrl)
-
-    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
     if engine.dirExists(path) == True:
         shutil.rmtree(path, ignore_errors=True)
     else:

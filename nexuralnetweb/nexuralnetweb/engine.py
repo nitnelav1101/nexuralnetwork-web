@@ -7,6 +7,9 @@ from werkzeug.utils import secure_filename, MultiDict
 import nexuralnetengine
 import json
 import re
+import StringIO
+import base64
+import matplotlib.pyplot as plt
 
 
 def addProject(projectName, accessCode):
@@ -70,8 +73,8 @@ def getAllTriningFiles(projectName):
 
 
 
-def getAllProjectTests(projectName):
-	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, 'tests')) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, 'tests', d))]
+def getAllProjectTests(projectName, trainingName):
+	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], d))]
 	return dirs
 
 
@@ -122,14 +125,13 @@ def dirExists(currentTestPath):
 	return os.path.isdir(currentTestPath) and os.path.exists(currentTestPath)
 
 
-def addTest(projectName, testName, networkArhitecture, trainedFile, formFile, readType):
-    currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+def addTest(projectName, trainingName, testName, networkArhitecture, trainedFile, formFile, readType):
+    currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
     resultFilePath = os.path.join(currentTestPath, 'result.json') 
     detailsFilePath = os.path.join(currentTestPath, 'details.json')
     filtersFolderPath = os.path.join(currentTestPath, app.config['TESTS_FILTERS_IMAGES_FOLDER_NAME'])
     networkArhitecturePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkArhitecture)
-    trainedFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINED_NETWORK_FILES_FOLDER_NAME'], trainedFile)
-
+    trainedFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, trainingName + ".json")
 
     createDirectory(filtersFolderPath)
 
@@ -170,3 +172,14 @@ def getTrainingStatus(projectName, trainingName):
 
 def trainedFileExists(projectName, trainingName):
 	return False
+
+
+def getPlotFromData(data, plotTitle):
+    img = StringIO.StringIO()
+    plt.plot(data)
+    plt.xlabel(plotTitle)
+    plt.savefig(img, format='png')
+    img.seek(0)
+    resPlot = base64.b64encode(img.getvalue())
+    plt.clf()
+    return resPlot

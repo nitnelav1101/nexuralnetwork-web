@@ -32,10 +32,6 @@ class AddNetworkTestForm(FlaskForm):
 	readType = SelectField('Mod citire imagine:', [validators.Required()], choices = [('0', '1 canal'), ('1', '3 canale')])
 	submit = SubmitField("Trimite")
 
-	def setArhitecturesChoices(self, availableNetworkArhitectures, availableTrainedFiles):
-		self.networkArhitecture.choices = availableNetworkArhitectures.items()
-		self.trainedFile.choices = availableTrainedFiles.items()
-
 class AddNetworkTrainingForm(FlaskForm):
 	trainingName = TextField("Nume antrenament:", [validators.Required(message='Va rugam sa alegeti un nume sugestiv pentru acest antrenament.')])
 	networkArhitecture = SelectField('Arhitectura retelei:', [validators.Required()], choices = [])

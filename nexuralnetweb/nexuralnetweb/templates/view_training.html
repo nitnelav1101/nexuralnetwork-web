@@ -1,22 +1,5 @@
 {% extends "layout.html" %} {% block content %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
-
-<style>
-.or_option {
-    font-size: 14px;
-    color: #008ed6;
-    text-transform: uppercase;
-    margin-top: 65px;
-    font-weight: 700;
-}
-
-.btn-space {
-    margin-right: 5px;
-}
-
-</style>
-
 <div class="col-xs-12 col-sm-12 col-md-12">
     <div class="page-header">
         {% if isProjectOwner == True %}
@@ -64,14 +47,14 @@
 
         <h3><b><span class="text-info"><i class="fa fa-cog" aria-hidden="true"></i> Opțiuni antrenament:</span></b></h3>
         <div style="padding-left: 25px;">
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Număr maxim de epoci:</b> max_num_epochs <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Epoci parcurse pentru salvare automată: </b> autosave_training_num_epochs <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a ratei de învățare:</b> min_learning_rate_threshold <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a erorii de validare:</b> min_validation_error_threshold <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Procent dimensiune set de antrenament</b> training_dataset_percentage <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Algoritm actualizare ponderi:</b> sgd_momentum <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Rata de învățare de pornire:</b> learning_rate <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Valoare de penalizare a ponderilor:</b> weight_decay
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Număr maxim de epoci:</b> {{ trainingConfigData['max_num_epochs'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Epoci parcurse pentru salvare automată: </b> {{ trainingConfigData['autosave_training_num_epochs'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a ratei de învățare:</b> {{ trainingConfigData['min_learning_rate_threshold'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a erorii de validare:</b> {{ trainingConfigData['min_validation_error_threshold'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Procent dimensiune set de antrenament</b> {{ trainingConfigData['training_dataset_percentage'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Algoritm actualizare ponderi:</b> {{ trainingConfigData['algorithm'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Rata de învățare de pornire:</b> {{ trainingConfigData['learning_rate'] }} <br>
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Valoare de penalizare a ponderilor:</b> {{ trainingConfigData['weight_decay'] }}
         </div>
 
 
@@ -98,13 +81,14 @@
         </ul>
         <div class="tab-content">
          <div class="tab-pane active" id="1">
-            <img src="data:image/png;base64, {{ plot_url }}" class="img-responsive"> 
+            <img src="data:image/png;base64, {{ plot_learning_rate_data }}" class="img-responsive"> 
          </div>
          <div class="tab-pane" id="2">
-            <canvas id="myChart" width="100" height="100" style="display: block; width: 300px; height: 50px;"></canvas>
+            <img src="data:image/png;base64, {{ plot_epoch_mean_error_data }}" class="img-responsive"> 
          </div>
-         <div class="tab-pane" id="3">Thirdamuno, ipsum dolor sit amet, consectetur adipiscing elit. Duis pharetra varius quam sit amet vulputate. 
-         Quisque mauris augue, molestie tincidunt condimentum vitae. </div>
+         <div class="tab-pane" id="3">
+            <img src="data:image/png;base64, {{ plot_validation_mean_error }}" class="img-responsive"> 
+         </div>
         </div>
       </div>
       <!-- /tabs -->
@@ -187,7 +171,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="myModalLabel">Adaugă un test nou</h4>
                 </div>
-                <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
+                <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName, trainingName = trainingName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
                     {{ formAddNetworkTest.hidden_tag() }}
                     <div class="modal-body">
                         <div class="row">
@@ -259,7 +243,7 @@
                                             <td> {{ test }}</td>
                                             <td class="text-right">
                                                 <a href="{{ url_for('viewTest', projectName = projectName, testName = test) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Deschide</a>
-                                                <a href="{{ url_for('deleteTest', projectName = projectName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                                <a href="{{ url_for('deleteTest', projectName = projectName, trainingName = trainingName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -279,46 +263,5 @@
     </div>
 
     </div>
-
-    <script>
-var ctx = document.getElementById("myChart").getContext('2d');
-var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
-});
-</script>
-
 
     {% endblock %}
