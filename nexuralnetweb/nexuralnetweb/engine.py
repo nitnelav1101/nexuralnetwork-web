@@ -40,12 +40,15 @@ def getAllProjectDatasets(projectName):
 	return dirs
 
 
-def getAllTestFilters(projectName, testName):
-	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'filters'))]
+def getAllTestFilters(projectName, trainingName, testName):
+	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'filters'))]
 	dic = []
+	filtersNumSet = set()
 	for x in files:
-		dic.append(os.path.basename(x))
-	return dic
+		layerNum = re.findall('\d+', x.split("_")[1].split("-")[0])[0]
+		dic.append((x, layerNum))
+		filtersNumSet.add(layerNum)
+	return dic, list(filtersNumSet)
 
 def getAllTrainings(projectName):
 	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
@@ -147,18 +150,23 @@ def addTest(projectName, trainingName, testName, networkArhitecture, trainedFile
     nexuralnetengine.runNetwork(networkArhitecturePath, trainedFilePath, completeFilename, readType, filtersFolderPath, resultFilePath)
 
 
-def getResult(projectName, testName):
-	path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'result.json')
+def getResult(projectName, trainingName, testName):
+	path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'result.json')
 	data = json.load(open(path))
 	resultType = data['result_type']
 
 	if resultType == "classification":
 		resultMessage = "Cea mai buna clasa de potrivire: "
+		resultTypeMessage = "clasificare"
+	elif resultType == "multiclass_classification":
+		resultMessage = "Cea mai buna clasa de potrivire: "
+		resultTypeMessage = "clasificare cu clase multiple"
 	else:
 		resultMessage = "Rezultatul este: "
+		resultTypeMessage = "regresie"
 
 	resultMessage = resultMessage + data['best_class']
-	return resultType, resultMessage
+	return resultTypeMessage, resultMessage
 
 
 def cleanAlphanumericString(content):

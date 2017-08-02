@@ -1,0 +1,35 @@
+    <div class="col-md-3 well">
+        <div class="test-img">
+          	<div class="text-center">
+              	<span style="font-size: 19px;"><b>TEST REALIZAT PENTRU</b></span>
+                <div class="tst-img">
+                    <img class="set-test-img" src="{{ url_for('getFileFromTest', projectName = projectName,  trainingName = trainingName, testName = testName, filename = 'image.jpg') }}" height="190" width="190">
+                </div>
+                <b><span class="text-success" style="font-size: 17px;">Tipul problemei: {{ resultType }} <br> {{ resultMessage }}</span><b>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+    	<div class="pull-right" style="font-size:21px;">Afisare filtre pentru 
+			<select class="filters-select">
+			  <option value="all">toate straturile</option>
+			  {% for layerNum in filtersNumSet %}
+			  <option value="{{ layerNum }}">stratul {{ layerNum }}</option>
+			  {% endfor %}
+			</select>
+		</div>
+		
+		<div style="clear:both"></div><br>
+  
+    <div class="grid">
+    	{% for imageName, layerNum in filtersImages %}
+    	 <div class="filter {{ layerNum }}" style="float:left !important">
+			   <img class="element-item" src="{{ url_for('getFileFromTest', projectName = projectName,  trainingName = trainingName, testName = testName, filename = "filters/" + imageName) }}">
+			</div>
+			{% endfor %}
+		</div>
+    
+		<div style="clear:both"></div>
+
+    </div>

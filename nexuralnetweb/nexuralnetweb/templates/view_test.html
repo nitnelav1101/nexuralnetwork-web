@@ -2,10 +2,10 @@
 
 {% block content %}
 <style>
-.login {
+.test-img {
     margin-top:27px;
 }
-.set-logo {
+.set-test-img {
     background:#fff;
     color:#ddd;
     border-radius:500%;
@@ -13,17 +13,9 @@
     font-size:108px;
     border: solid #ddd 14px;
 }
-.logo {
+.tst-img {
     margin-top:27px;
     margin-bottom:54px;
-}
-
-.last-row {
-    margin-bottom:0px;
-}
-
-.checklabel {
-    font-weight:100;
 }
 </style>
 
@@ -41,22 +33,18 @@
 </div>
 
 
-<div class="row login">
+    <div class="row .test-img">
         <div class="col-md-4 col-sm-6 well">
               <div class="form-group text-center">
               <h3><b>TEST REALIZAT PENTRU</b></h3>
-                <div class="logo">
-                    <img class="set-logo" src=" {{ url_for('getFileFromTest', projectName = projectName, testName = testName, filename = 'image.jpg') }} " height="242" width="242">
+                <div class="tst-img">
+                    <img class="set-test-img" src=" {{ url_for('getFileFromTest', projectName = projectName, testName = testName, filename = 'image.jpg') }} " height="242" width="242">
                 </div>
               </div>
             {{ resultMessage }}
         </div>
     </div>
 
-
-    {% for imageName in filtersImages %}
-                            <img  src=" {{ url_for('getFileFromTest', projectName = projectName, testName = testName, filename = 'filters/' + imageName) }} " height="80" width="80">      
-                        {% endfor %}
 
 <br><div style="clear:both"></div><br>
 

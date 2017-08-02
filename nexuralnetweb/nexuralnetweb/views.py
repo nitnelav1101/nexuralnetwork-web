@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, url_for, session, send_file, send_from_directory
+from flask import flash, redirect, render_template, request, url_for, session, send_file, send_from_directory, jsonify
 from werkzeug.utils import secure_filename, MultiDict
 from nexuralnetweb import app
 from forms import CreateProjectForm, SecureProjectForm, AddTrainingFileForm, AddNetworkFileForm, AddNetworkTestForm, AddNetworkTrainingForm, AddPredefinedDatSetForm
@@ -10,6 +10,13 @@ import nexuralnet
 import threading
 import nexuralnetengine
 from nexuralnetweb import celery
+
+
+@app.route('/get_data/<string:projectName>/<string:trainingName>/<string:testName>', methods=['GET'])
+def get_data(projectName, trainingName, testName):
+    filtersImages, filtersNumSet = engine.getAllTestFilters(projectName, trainingName, testName)
+    resultType, resultMessage = engine.getResult(projectName, trainingName, testName)
+    return jsonify({'data': render_template('test_net_filters.html', projectName = projectName, trainingName = trainingName, testName = testName, filtersImages = filtersImages, filtersNumSet = filtersNumSet, resultType = resultType, resultMessage = resultMessage)})
 
 
 # -------------------------------------------------------------------------------------
@@ -204,21 +211,11 @@ def deleteTrainingFile(projectName, trainingConfigFile):
 
 
 
-@app.route('/getFileFromTest/<string:projectName>/<string:testName>/<path:filename>')
-def getFileFromTest(projectName, testName, filename):
-    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
+@app.route('/getFileFromTest/<string:projectName>/<string:trainingName>/<string:testName>/<path:filename>')
+def getFileFromTest(projectName, trainingName, testName, filename):
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
     return send_from_directory(path, filename)
 
-
-
-@app.route('/viewTest/<string:projectName>/<string:testName>')
-def viewTest(projectName, testName):
-    isProjectOwner = engine.isProjectOwner(projectName)
-    filtersImages = engine.getAllTestFilters(projectName, testName)
-    
-    resultType, resultMessage = engine.getResult(projectName, testName)
-    return render_template('view_test.html', title = 'Vizualizare test | neXuralNet Project', projectName = projectName, testName = testName, isProjectOwner = isProjectOwner, 
-        resultType = resultType, resultMessage = resultMessage, filtersImages = filtersImages)
 
 
 
