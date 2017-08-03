@@ -20,7 +20,6 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 
 	trainingConfusionMatrix = data['epochs']['epoch' + str(epochNum)]['training_confusion_matrix']
 	trainingConfusionMatrixNP = np.array([d for d in trainingConfusionMatrix])
-	
 
 	trainingPrecision = trainingConfusionMatrixNP[classNum][classNum] / trainingConfusionMatrixNP.sum(axis=0)[classNum]
 	trainingRecall = trainingConfusionMatrixNP[classNum][classNum] / trainingConfusionMatrixNP[classNum].sum()
@@ -31,7 +30,6 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 	statstr['f1score'] = str(trainingF1score)
 	trainingStats.append(statstr)
 
-	
 	precision = validationConfusionMatrixNP[classNum][classNum] / validationConfusionMatrixNP.sum(axis=0)[classNum]
 	recall = validationConfusionMatrixNP[classNum][classNum] / validationConfusionMatrixNP[classNum].sum()
 	f1score = 2 * ((precision * recall) / (precision + recall))
@@ -43,6 +41,8 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 	validationStats.append(stats)
 
 	return trainingStats, validationStats
+
+
 
 def getTrainingStats(projectName, trainingName):
 	dataInfoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info", "trainerInfo.json")
@@ -87,8 +87,7 @@ def getTrainingStats(projectName, trainingName):
 
 	return trainingStats, validationStats, trainingInfo
 
-def getInitialWeightsHistogram():
-	return ''
+
 
 def runNetwork(networkArhitecture, trainedFile, imageFile, openImageType, filtersFolderPath, resultFilePath):
 	net = nexuralnet.network(networkArhitecture)
