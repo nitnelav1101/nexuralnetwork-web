@@ -97,10 +97,6 @@
                 <br>
             </div>
 
-           
-
-        <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#formViewNetworkTestsModal"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează configurația rețelei neurale</button>
-        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formViewNetworkTestsModal"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează histograma ponderilor</button>
         <div style="clear:both"></div><br>
 
         <h3><b><span class="text-info"><i class="fa fa-cog" aria-hidden="true"></i> Opțiuni antrenament:</span></b></h3>
@@ -112,10 +108,10 @@
             <b><i class="fa fa-caret-right" aria-hidden="true"></i> Procent dimensiune set de antrenament</b> {{ trainingConfigData['training_dataset_percentage'] }} <br>
             <b><i class="fa fa-caret-right" aria-hidden="true"></i> Algoritm actualizare ponderi:</b> {{ trainingConfigData['algorithm'] }} <br>
             <b><i class="fa fa-caret-right" aria-hidden="true"></i> Rata de învățare de pornire:</b> {{ trainingConfigData['learning_rate'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Valoare de penalizare a ponderilor:</b> {{ trainingConfigData['weight_decay'] }}
+            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Valoare de penalizare a ponderilor:</b> {{ trainingConfigData['weight_decay'] }}<br>
         </div>
 
-
+        <div style="clear:both"></div><br>
   
     
         </div>
@@ -155,41 +151,46 @@
          <div style="clear:both"></div><hr>
 
 
-         <b><span class="text-warning">
-         Afișează statistici pentru epoca
-         <select class="selectpicker">
-            {% for i in range(0, trainingInfo['epochs_num']|int) %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select> <b>și clasa</b>
-            <select name="classNum">
-                {% for i in range(0, validationStats|length) %}
-                <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-            </select></b></span>
+        <b>
+            <span class="text-warning"> Afișează statistici pentru epoca
+                <select class="selectEpochNumTrainingStats">
+                    {% for i in range(0, trainingInfo['epochs_num']|int) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select> 
+                <b>și clasa</b>
+                <select class="selectClassNumTrainingStats">
+                    {% for i in range(0, validationStats|length) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </span>
+        </b>
 
         <div style="clear:both"></div>
 
-        <div class="col-md-5">
-            <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de antrenament</h3>
-            <div style="font-size: 17px;">
-            <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingStats[0]['recall'] }}
-            <br>
-            <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingStats[0]['precision'] }}
-            <br>
-            <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingStats[0]['f1score'] }}
-            <br>
+        <div class="trainingStatsContent">
+            <div class="col-md-5">
+                <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de antrenament</h3>
+                <div style="font-size: 17px;">
+                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingStats[0]['recall'] }}
+                <br>
+                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingStats[0]['precision'] }}
+                <br>
+                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingStats[0]['f1score'] }}
+                <br>
+                </div>
             </div>
-        </div>
-        <div class="col-md-5">
-            <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de validare</h3>
-            <div style="font-size: 17px;">
-            <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ validationStats[0]['recall'] }}
-            <br>
-            <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ validationStats[0]['precision'] }}
-            <br>
-            <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ validationStats[0]['f1score'] }}
-            <br>
+            <div class="col-md-5">
+                <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de validare</h3>
+                <div style="font-size: 17px;">
+                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ validationStats[0]['recall'] }}
+                <br>
+                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ validationStats[0]['precision'] }}
+                <br>
+                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ validationStats[0]['f1score'] }}
+                <br>
+                </div>
             </div>
         </div>
     </div>
@@ -232,7 +233,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Adaugă un test nou</h4>
+                    <h4 class="modal-title" id="myModalLabel">Formular adaugare test nou</h4>
                 </div>
                 <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName, trainingName = trainingName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
                     {{ formAddNetworkTest.hidden_tag() }}
@@ -282,7 +283,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Vizualizare teste existente</h4>
+                    <h4 class="modal-title" id="myModalLabel">Lista testelor efectuate</h4>
                 </div>
                     <div class="modal-body">
                         <div class="row">
@@ -316,9 +317,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-                        
                     </div>
-              
             </div>
         </div>
     </div>
@@ -330,7 +329,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Vizualizare test</h4>
+                    <h4 class="modal-title" id="myModalLabel">Rezultate test</h4>
                 </div>
                     <div class="modal-body">
                         <div class="row">
@@ -346,6 +345,8 @@
             </div>
         </div>
     </div>
+
+    
 
 <script>
     $(document).ready(function() {
@@ -377,6 +378,32 @@
                 });
             });
         });
+
+
+
+        $(".selectEpochNumTrainingStats").on( 'change', function() {
+            getTrainingStats();
+        });
+
+        $(".selectClassNumTrainingStats").on( 'change', function() {
+            getTrainingStats();
+        });
+
+        function getTrainingStats() {
+            epochNum = $('.selectEpochNumTrainingStats').find(":selected").text();
+            classNum = $('.selectClassNumTrainingStats').find(":selected").text();
+            queryUrl = "/getTrainingStats/{{ projectName }}/{{ trainingName }}/"+ epochNum + "/" + classNum;
+
+            $.ajax({
+                type: 'GET',
+                cache: false,
+                url: queryUrl, 
+                success: function(resp){
+                    $( ".trainingStatsContent" ).empty();
+                    $('.trainingStatsContent').html(resp.data);
+                }
+            })
+        }
     }); 
 </script>
 

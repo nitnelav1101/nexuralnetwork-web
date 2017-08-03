@@ -19,6 +19,12 @@ def get_data(projectName, trainingName, testName):
     return jsonify({'data': render_template('test_net_filters.html', projectName = projectName, trainingName = trainingName, testName = testName, filtersImages = filtersImages, filtersNumSet = filtersNumSet, resultType = resultType, resultMessage = resultMessage)})
 
 
+@app.route('/getTrainingStats/<string:projectName>/<string:trainingName>/<string:epochNum>/<string:classNum>', methods=['GET'])
+def getTrainingStats(projectName, trainingName, epochNum, classNum):
+    trainingStats, validationStats = nexuralnetengine.getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
+    return jsonify({'data': render_template('training_stats.html', trainingStats = trainingStats, validationStats = validationStats)})
+
+
 # -------------------------------------------------------------------------------------
 #### Home page
 # -------------------------------------------------------------------------------------
