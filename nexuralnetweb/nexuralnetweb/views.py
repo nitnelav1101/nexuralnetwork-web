@@ -110,12 +110,6 @@ def secureProject(projectName):
 
 
 
-@app.route('/downloadExampleFile/<string:filename>')
-def downloadExampleFile(filename):
-    filePath = os.path.join('..', app.config['GENERAL_FILES_FOLDER_NAME'], filename)
-    return send_file(filePath)
-
-
 
 
 @app.route('/AddNetworkFile/<string:projectName>', methods=['POST'])
@@ -175,6 +169,24 @@ def addTrainingFile(projectName):
         return redirect(redirectUrl)
 
 
+@app.route('/downloadConfigFile/<string:projectName>/<string:configType>/<string:fileName>')
+def downloadConfigFile(projectName, configType, fileName):
+    if configType == "netConfig":
+        filePath = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], fileName)
+    elif configType == "trainConfig":
+        filePath = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], fileName)
+    else:
+        flash('Fisierul selectat nu se poate descarca!', 'danger')
+        return redirect('/project/' + projectName)
+    return send_file(filePath)
+
+
+
+@app.route('/downloadExampleFile/<string:fileName>')
+def downloadExampleFile(fileName):
+    filePath = os.path.join('..', app.config['GENERAL_FILES_FOLDER_NAME'], fileName)
+    return send_file(filePath)
+
 
 @app.route('/deleteConfigFile/<string:projectName>/<string:networkConfigFile>')
 def deleteConfigFile(projectName, networkConfigFile):
@@ -184,7 +196,7 @@ def deleteConfigFile(projectName, networkConfigFile):
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
         return redirect(redirectUrl)
 
-    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
     if engine.fileExists(path) == True:
         os.remove(path)
     else:
@@ -204,7 +216,7 @@ def deleteTrainingFile(projectName, trainingConfigFile):
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
         return redirect(redirectUrl)
 
-    path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
     if engine.fileExists(path) == True:
         os.remove(path)
     else:
@@ -213,6 +225,12 @@ def deleteTrainingFile(projectName, trainingConfigFile):
 
     flash('Fisierul de configurare a fost sters cu succes!', 'success')
     return redirect(redirectUrl)
+
+
+
+
+
+
 
 
 

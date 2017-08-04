@@ -1,20 +1,6 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<style>
-    .or_option {
-        font-size: 14px;
-        color: #008ed6;
-        text-transform: uppercase;
-        margin-top: 65px;
-        font-weight: 700;
-    }
-
-    .instructions {
-        padding: 20px;
-        background-color: #f5f5f5;
-    }
-</style>
 
 <div class="col-xs-12 col-sm-12 col-md-12">
 	<div class="page-header">
@@ -25,7 +11,7 @@
         {% endif %}
     </div>
 
-    <div class="row">
+    <div class="col-md-12">
         <ol class="breadcrumb bread-primary ">
             <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
             {% if isProjectOwner == True %}
@@ -48,57 +34,57 @@
         {% else %}
         <div class="alert alert-danger">
           <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
-        </div>
-        <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a>
-        {% endif %}
-    </div>
+      </div>
+      <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a>
+      {% endif %}
+  </div>
 
-    <div class="col-md-7"> 
+  <div class="col-md-7"> 
     <div style="clear:both"></div>
-        <div class="instructions">
+    <div class="instructions">
         <div class="col-xs-12 col-md-4">
             <div class="widget red-bg p-lg text-center">
                 <div class="m-b-md">
                     <i class="fa fa-file-text-o fa-4x"></i>
                     <h1 class="m-xs">{{ availableNetworkArhitectures|length }}</h1>
                     <h3 class="font-bold no-margins">
-                         Fișier(e) de configurare a rețelei neurale de convoluție
-                    </h3>
-                </div>
-            </div>  
-        </div>
-        
-        <div class="col-xs-12 col-md-4">
-            <div class="widget lazur-bg p-lg text-center">
-                <div class="m-b-md">
-                    <i class="fa fa-file-code-o fa-4x"></i>
-                    <h1 class="m-xs">{{ availableTrainingFiles|length }}</h1>
-                    <h3 class="font-bold no-margins">
-                        Fișier(e) de configurare al modului de antrenament
-                    </h3>
-                </div>
+                     Fișier(e) de configurare a rețelei neurale de convoluție
+                 </h3>
+             </div>
+         </div>  
+     </div>
+
+     <div class="col-xs-12 col-md-4">
+        <div class="widget lazur-bg p-lg text-center">
+            <div class="m-b-md">
+                <i class="fa fa-file-code-o fa-4x"></i>
+                <h1 class="m-xs">{{ availableTrainingFiles|length }}</h1>
+                <h3 class="font-bold no-margins">
+                    Fișier(e) de configurare al modului de antrenament
+                </h3>
             </div>
         </div>
-        
-        <div class="col-xs-12 col-md-4">
-            <div class="widget navy-bg p-lg text-center">
-                <div class="m-b-md">
-                    <i class="fa fa-cogs fa-4x"></i>
-                    <h1 class="m-xs">{{ availableTrainings|length }}</h1>
-                    <h3 class="font-bold no-margins">
-                        Antrenament(e) efectuat(e) în acest proiect
-                    </h3>
-                </div>
+    </div>
+
+    <div class="col-xs-12 col-md-4">
+        <div class="widget navy-bg p-lg text-center">
+            <div class="m-b-md">
+                <i class="fa fa-cogs fa-4x"></i>
+                <h1 class="m-xs">{{ availableTrainings|length }}</h1>
+                <h3 class="font-bold no-margins">
+                    Antrenament(e) efectuat(e) în acest proiect
+                </h3>
             </div>
         </div>
-        <div style="clear:both"></div>
     </div>
+    <div style="clear:both"></div>
+</div>
 
-    </div>
+</div>
 
- <div style="clear:both"></div><br>
+<div style="clear:both"></div><br>
 
-    <div class="col-md-12">
+<div class="col-md-12">
     <!-- Nav tabs -->
     <div class="card">
         <ul class="nav nav-tabs" role="tablist">
@@ -115,121 +101,127 @@
                         <tr>
                          <th>Nume fișier</th>
                          <th class="text-right"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% if availableNetworkArhitectures|length == 0 %}
-                        <tr><td>nu sunt fisiere disponibile</td></tr>
-                        {% endif %}
+                     </tr>
+                 </thead>
+                 <tbody>
+                    {% if availableNetworkArhitectures|length == 0 %}
+                    <tr><td>nu sunt fisiere disponibile</td></tr>
+                    {% endif %}
 
-                        {% for key, value in availableNetworkArhitectures.iteritems() %}
-                            <tr>
-                                <td> {{ key }}</td>
-                                <td class="text-right"> 
-                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
-                                    {% if isProjectOwner == True %}
-                                        <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
-                                    {% endif %}
-                                </td>
-                            </tr>          
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div role="tabpanel" class="tab-pane" id="fisiereantremaent">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                         <th>Nume fișier</th>
-                         <th class="text-right"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% if availableTrainingFiles|length == 0 %}
-                        <tr><td>nu sunt fisiere disponibile</td></tr>
-                        {% endif %}
-
-                        {% for key, value in availableTrainingFiles.iteritems() %}
-                            <tr>
-                                <td> {{ key }}</td>
-                                <td class="text-right"> 
-                                    <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
-                                    {% if isProjectOwner == True %}
-                                        <a href="{{ url_for('deleteTrainingFile', projectName = projectName, trainingConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
-                                    {% endif %}
-                                </td>
-                            </tr>          
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div role="tabpanel" class="tab-pane active" id="antrenamente">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                         <th>Nume antrenament</th>
-                         <th class="text-right"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% if availableTrainings|length == 0 %}
-                        <tr><td>nu sunt antrenamente disponibile</td></tr>
-                        {% endif %}
-
-                        {% for training in availableTrainings %}
-                            <tr>
-                                <td> {{ training }}</td>
-                                <td class="text-right"> 
-                                    <a href="{{ url_for('viewTraining', projectName = projectName, trainingName = training) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</a>
-                                    {% if isProjectOwner == True %}
-                                        <a href="{{ url_for('deleteTraining', projectName = projectName, trainingName = training) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
-                                    {% endif %}
-                                </td>
-                            </tr>          
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% for key, value in availableNetworkArhitectures.iteritems() %}
+                    <tr>
+                        <td> {{ key }}</td>
+                        <td class="text-right"> 
+                            <a href="{{ url_for('downloadConfigFile', projectName = projectName, configType = 'netConfig', fileName = key) }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
+                            {% if isProjectOwner == True %}
+                            <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                            {% endif %}
+                        </td>
+                    </tr>          
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+
+        <div role="tabpanel" class="tab-pane" id="fisiereantremaent">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                     <th>Nume fișier</th>
+                     <th class="text-right"></th>
+                 </tr>
+             </thead>
+             <tbody>
+                {% if availableTrainingFiles|length == 0 %}
+                <tr><td>nu sunt fisiere disponibile</td></tr>
+                {% endif %}
+
+                {% for key, value in availableTrainingFiles.iteritems() %}
+                <tr>
+                    <td> {{ key }}</td>
+                    <td class="text-right"> 
+                        <a href="{{ url_for('downloadConfigFile', projectName = projectName, configType = 'trainConfig', fileName = key) }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
+                        {% if isProjectOwner == True %}
+                        <a href="{{ url_for('deleteTrainingFile', projectName = projectName, trainingConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                        {% endif %}
+                    </td>
+                </tr>          
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+    <div role="tabpanel" class="tab-pane active" id="antrenamente">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                 <th>Nume antrenament</th>
+                 <th class="text-right"></th>
+             </tr>
+         </thead>
+         <tbody>
+            {% if availableTrainings|length == 0 %}
+            <tr><td>nu sunt antrenamente disponibile</td></tr>
+            {% endif %}
+
+            {% for training in availableTrainings %}
+            <tr>
+                <td> {{ training }}</td>
+                <td class="text-right"> 
+                    <a href="{{ url_for('viewTraining', projectName = projectName, trainingName = training) }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</a>
+                    {% if isProjectOwner == True %}
+                    <a href="{{ url_for('deleteTraining', projectName = projectName, trainingName = training) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                    {% endif %}
+                </td>
+            </tr>          
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
 </div>
 
 </div>
 
 
-<br><div style="clear:both"></div><hr>
+<br><div style="clear:both"></div>
 
-        <section class="widget-type2">
-        <header>
-            <h2>
-                Instrucțiuni de utilizare:
-            </h2>
-        </header>
-        
-        <div class="widget-type2-body">
-            <p><strong>Această secțiune</strong> vă permite să gestionați antrenamentele si testele din cadrul proiectului selectat. Puteți adăuga fișiere noi de configurare a rețelei sau antrenamnetelor, gestiona seturile de date și bineînțeles puteți iniția antrenamente noi sau pur și simplu vizualizați detalii legate de fișierele deja generate.</p>
-            <ul class="text-list">
-                <li><strong>Adaugă fișier de configurare a rețelei neurale</strong> - de completat;</li>
-                <li><strong>Adaugă fișier de configurare al modului de antrenament</strong> - de completat;</li>
-                <li><strong>Efectuează un antrenament nou</strong> - de completat;</li>
-            </ul>
+{% if isProjectOwner == True %}
+<hr>
 
-             <p>
-                Vă punem la dispoziție două fișiere exemplu, unul pentru configurarea rețelei dorite, iar celalalt pentru configurarea modului de antrenament. Puteți modifica parametrii, singura restricție fiind aceea de a păstra structura, in caz contrar când veți rula procesele o să primiți mesaje de eroare.
-            </p>
-            <a href="{{ url_for('downloadExampleFile', filename = 'network.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de configurare</a>
-            <a href="{{ url_for('downloadExampleFile', filename = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de antrenament</a>
-            <br><br>
-            <p>
-                <i>Dacă întâmpinați probleme (erori) la una dintre opțiunile platformei vă rugăm să ne contactați! Vă mulțumim!</i>
-            </p>
-            
-        </div>
-    </section>
+<div class="col-md-12">
+<section class="widget-type2">
+    <header>
+        <h2>
+            Instrucțiuni de utilizare:
+        </h2>
+    </header>
 
-    <br><div style="clear:both"></div><br>
+    <div class="widget-type2-body">
+        <p><strong>Această secțiune</strong> vă permite să gestionați proiectul curent. Puteți adăuga fișiere noi de configurare a rețelei sau al modului de antrenamnet și bineînțeles puteți iniția antrenamente noi sau pur și simplu vizualizați detalii legate de fișierele deja generate.</p>
+        <ul class="text-list">
+            <li><strong>Adaugă fișier de configurare a rețelei neurale</strong> - acest fișier conține structura rețelei neurale de convoluție împreună cu setările fiecărui strat;</li>
+            <li><strong>Adaugă fișier de configurare al modului de antrenament</strong> - acest fișier conține parametrii ce se vor utiliza în cadrul pasului de antrenare;</li>
+            <li><strong>Gestionează seturile de date</strong> - adauga sau modifică seturile de date ce sunt utilizate la pasul de antrenare al rețelei neurale de convoluție;</li>
+            <li><strong>Efectuează un antrenament nou</strong> - pornește un antrenament nou ce o să folosească fișierele de configurare dorite împreună cu unul din seturile de date existente;</li>
+        </ul>
+
+        <p>
+            Vă punem la dispoziție două fișiere model, unul pentru configurarea rețelei dorite, iar celalalt pentru configurarea modului de antrenament. Puteți modifica parametrii, singura restricție fiind aceea de a păstra structura, in caz contrar când veți rula antrenamentul o să primiți mesaje de eroare.
+        </p>
+        <a href="{{ url_for('downloadExampleFile', fileName = 'network.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de configurare</a>
+        <a href="{{ url_for('downloadExampleFile', fileName = 'trainer.json') }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Exemplu fișier de antrenament</a>
+        <br><br>
+        <p>
+            <i>Dacă întâmpinați probleme (erori) la una dintre opțiunile platformei vă rugăm să ne contactați! Vă mulțumim!</i>
+        </p>
+
+    </div>
+</section>
+</div>
+
+<br><div style="clear:both"></div><br>
 
 <!-- Modal add network file -->
 <div class="modal fade" id="formAddNetworkFileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -301,35 +293,37 @@
       {{ formAddNetworkTraining.hidden_tag() }}
       <div class="modal-body">
        <div class="row">
-                <div class="col-md-6">
-                    {{ formAddNetworkTraining.trainingName.label }} <br>
-                    {{ formAddNetworkTraining.trainingName(class_="form-control") }} <br>
-                </div>
+        <div class="col-md-6">
+            {{ formAddNetworkTraining.trainingName.label }} <br>
+            {{ formAddNetworkTraining.trainingName(class_="form-control") }} <br>
+        </div>
 
-                <div class="col-md-6">
-                    {{ formAddNetworkTraining.networkArhitecture.label }} <br>
-                    {{ formAddNetworkTraining.networkArhitecture(class_="form-control") }} <br>
-                </div>
+        <div class="col-md-6">
+            {{ formAddNetworkTraining.networkArhitecture.label }} <br>
+            {{ formAddNetworkTraining.networkArhitecture(class_="form-control") }} <br>
+        </div>
 
-                <div class="col-md-6">
-                    {{ formAddNetworkTraining.trainingFile.label }} <br>
-                    {{ formAddNetworkTraining.trainingFile(class_="form-control") }} <br>
-                </div>
+        <div class="col-md-6">
+            {{ formAddNetworkTraining.trainingFile.label }} <br>
+            {{ formAddNetworkTraining.trainingFile(class_="form-control") }} <br>
+        </div>
 
-                <div class="col-md-6">
-                    {{ formAddNetworkTraining.trainingDataSet.label }} <br>
-                    {{ formAddNetworkTraining.trainingDataSet(class_="form-control") }} <br>
-                </div>
-            </div>
-        <div style="clear:both"></div>
+        <div class="col-md-6">
+            {{ formAddNetworkTraining.trainingDataSet.label }} <br>
+            {{ formAddNetworkTraining.trainingDataSet(class_="form-control") }} <br>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-        {{ formAddNetworkTraining.submit(id_="button", class_="btn btn-primary") }}
-    </div>
+    <div style="clear:both"></div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+    {{ formAddNetworkTraining.submit(id_="button", class_="btn btn-primary") }}
+</div>
 </form>
 </div>
 </div>
 </div>
+
+{% endif %}
 
 {% endblock %}

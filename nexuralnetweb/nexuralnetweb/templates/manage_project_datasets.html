@@ -1,16 +1,8 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<style>
-.or_option{
-    font-size: 14px;
-    color: #008ed6;
-    text-transform: uppercase;
-    margin-top: 65px;
-    font-weight: 700;
-}
-</style>
 
+{% if isProjectOwner == True %}
 <div class="col-xs-12 col-sm-12 col-md-12">
 	<div class="page-header">
     {% if isProjectOwner == True %}
@@ -20,7 +12,7 @@
     {% endif %}
 	</div>
 
-    <div class="row">
+    <div class="cold-md-12">
         <ol class="breadcrumb bread-primary">
             <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
             {% if isProjectOwner == True %}
@@ -36,7 +28,6 @@
 
         {% if isProjectOwner == True %}
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddPredefinedDataSet"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă un set de date predefinit</button>
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddDataSet"><i class="fa fa-plus" aria-hidden="true"></i> Importă un set de date local</button>
         {% else %}
         <div class="alert alert-danger">
           <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
@@ -123,31 +114,6 @@
 </div>
 </div>
 </div>
-
-
-
-<!-- Modal add data set -->
-<div class="modal fade" id="formAddDataSet" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Importă un set de date local</h4>
-    </div>
-
-   
-      <div class="modal-body">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-            Aceasta optiune nu este inca disponibila!
-        </div>
-        <div style="clear:both"></div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-    </div>
-
-</div>
-</div>
-</div>
+{% endif %}
 
 {% endblock %}

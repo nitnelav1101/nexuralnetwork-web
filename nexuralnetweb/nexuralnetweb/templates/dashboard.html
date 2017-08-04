@@ -1,128 +1,48 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<style>
-.or_option{
-    font-size: 14px;
-    color: #008ed6;
-    text-transform: uppercase;
-    margin-top: 65px;
-    font-weight: 700;
-}
-
-.card {
-  display: block;
-    margin-bottom: 20px;
-    line-height: 1.42857143;
-    background-color: #fff;
-    border-radius: 2px;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
-    transition: box-shadow .25s;
-}
-.card:hover {
-  box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-}
-.img-card {
-  width: 100%;
-  height: 15px;
-  border-top-left-radius:2px;
-  border-top-right-radius:2px;
-  display:block;
-  overflow: hidden;
-  background-color: #337ab7 !important;
-}
-
-.card-content {
-  padding:10px;
-  text-align:left;
-}
-.card-title {
-  margin-top:0px;
-  font-weight: 700;
-  line-height: 105%;
-  font-size: 1.25em;
-}
-.card-title a {
-  color: #000;
-  text-decoration: none !important;
-}
-.card-read-more {
-  border-top: 1px solid #D4D4D4;
-}
-.card-read-more a {
-  text-decoration: none !important;
-  padding:10px;
-  font-weight:600;
-  text-transform: uppercase
-}
-
-
-
-
-.jumbotron-codelines {
-    color: rgba(255,255,255,0.6);
-    background: url(/static/img/simple-codelines.svg),#2b3137;
-    background-position: center 10%;
-    background-size: cover;
-}
-
-.bg-gray-light {
-    background-color: #fafbfc !important;
-}
-
-.text-white {
-    color: #fff !important;
-}
-
-.text-gray {
-    color: #000 !important;
-    font-size: 1.5rem;
-    line-height: 1.6666666667;
-}
-</style>
 
 <br><br>
 <div class="col-xs-12 col-sm-12 col-md-12">
 
-<div class="jumbotron jumbotron-codelines">
-  <div class="container-lg p-responsive position-relative">
-    <div class="d-md-flex flex-items-center gutter-md-spacious">
-      <div class="col-md-7 text-md-left ">
-        <h1 class="alt-h0 text-white lh-condensed-ultra mb-3">Creează proiect</h1>
-        <p class="alt-lead mb-4">
-          Trebuie doar să alegeți numele proiectului, un cod de acces (ca altcineva să nu vă poată modifica munca) și sunteți gata să testați ce și cum doriți. Completați formularul alăturat și puteți începe lucrul fără alte bătăi de cap!
-          </p>
-      </div>
-        <div class="mx-auto col-sm-8 col-md-5 hide-sm rounded-1 bg-gray-light pt-4 pb-5">
-        <
-          <form class="form form-horizontal" action="" method="post" name="createProject">
-	      {{ form.hidden_tag() }}
-	      <p>
-	      	{{ form.projectName.label(class_="text-gray") }} <br>
-	     	{{ form.projectName(class_="form-control") }}   
-	      
-	      	{{ form.accessCode.label(class_="text-gray") }} <br>
-	     	{{ form.accessCode(class_="form-control") }}  
-	     
-	      	{{ form.confirm.label(class_="text-gray") }} <br>
-	     	{{ form.confirm(class_="form-control") }}  
-	      </p>
+	<div class="jumbotron jumbotron-codelines">
+		<div class="container-lg p-responsive position-relative">
+			<div class="d-md-flex flex-items-center gutter-md-spacious">
+				<div class="col-md-7 text-md-left ">
+					<h1 class="alt-h0 text-white lh-condensed-ultra mb-3">Creează proiect</h1>
+					<p class="alt-lead mb-4">
+						Trebuie doar să alegeți numele proiectului, un cod de acces (ca altcineva să nu vă poată modifica munca) și sunteți gata să testați ce și cum doriți. Completați formularul alăturat și puteți începe lucrul fără alte bătăi de cap!
+					</p>
+				</div>
+				<div class="mx-auto col-sm-8 col-md-5 hide-sm rounded-1 bg-gray-light pt-4 pb-5">
+					<br>
+					<form class="form form-horizontal" action="" method="post" name="createProject">
+						{{ form.hidden_tag() }}
+						<p>
+							{{ form.projectName.label(class_="text-gray") }} <br>
+							{{ form.projectName(class_="form-control") }}   
 
-	      {{ form.submit(id_="button", class_="btn btn-primary btn-lg btn-block login-button") }}
-	      <div style="clear:both"></div><br>
-	  	</form>
-        </div>
-        <div style="clear:both"></div>
-    </div>
-  </div>
-</div>
+							{{ form.accessCode.label(class_="text-gray") }} <br>
+							{{ form.accessCode(class_="form-control") }}  
 
+							{{ form.confirm.label(class_="text-gray") }} <br>
+							{{ form.confirm(class_="form-control") }}  
+						</p>
+
+						{{ form.submit(id_="button", class_="btn btn-primary btn-lg btn-block login-button") }}
+						<div style="clear:both"></div><br>
+					</form>
+				</div>
+				<div style="clear:both"></div>
+			</div>
+		</div>
+	</div>
 
 	<div style="clear:both"></div>
 
 	<div class="col-md-4 col-md-offset-4">
 		<center>
-		<h2>SAU</h2>
+			<h2>SAU</h2>
 			<span class="or_option">Puteți opta să vizualizați un proiect <br>deja existent</span>
 			<img class="img-responsive" src="/static/img/daag.png" alt="">
 		</center>
@@ -130,36 +50,36 @@
 
 	<div style="clear:both"></div><br>
 
-	
-		{% for project in existingProjects %}
-		<div class="col-xs-12 col-sm-4">
-			<div class="card">
-			<div class="img-card"> </div>
-		                <div class="card-content">
-		                    <h4 class="card-title">
-		                        {{ project }} 
-		                    </h4>
-		                    <div class="">
-		                       <center><b>Vizualizează proiectul ca:</b></div>
-		                </div>
-		                <div class="card-read-more">
-		                	<div class="col-xs-6 col-sm-6 col-md-6">
-			                    <a class="btn btn-link btn-block" href="{{ url_for('secureProject', projectName = project) }}">
-			                        <i class="fa fa-user-circle-o" aria-hidden="true"></i> Proprietar <i class="fa fa-chevron-right" aria-hidden="true"></i>
-			                    </a>
-		                    </div>
-		                    <div class="col-xs-6 col-sm-6 col-md-6">
-			                    <a class="btn btn-link btn-block" href="{{ url_for('project', projectName = project) }}">
-			                        <i class="fa fa-user-secret" aria-hidden="true"></i> Vizitator <i class="fa fa-chevron-right" aria-hidden="true"></i>
-			                    </a>
-		                    </div>
-		                    <br><br>
-		                </div>
-		            </div>
-		            </div>
-	    {% endfor %}            
-	
+	{% for project in existingProjects %}
+	<div class="col-xs-12 col-sm-4">
+		<div class="card">
+			<div class="img-card"></div>
+			<div class="card-content">
+				<h4 class="card-title">
+					{{ project }} 
+				</h4>
+				<div>
+					<center><b>Vizualizează proiectul ca:</b></center>
+				</div>
+			</div>
+			<div class="card-read-more">
+				<div class="col-xs-6 col-sm-6 col-md-6">
+					<a class="btn btn-link btn-block" href="{{ url_for('secureProject', projectName = project) }}">
+						<i class="fa fa-user-circle-o" aria-hidden="true"></i> Proprietar <i class="fa fa-chevron-right" aria-hidden="true"></i>
+					</a>
+				</div>
+				<div class="col-xs-6 col-sm-6 col-md-6">
+					<a class="btn btn-link btn-block" href="{{ url_for('project', projectName = project) }}">
+						<i class="fa fa-user-secret" aria-hidden="true"></i> Vizitator <i class="fa fa-chevron-right" aria-hidden="true"></i>
+					</a>
+				</div>
+				<br><br>
+			</div>
+		</div>
+	</div>
+	{% endfor %}            
 
-<br><div style="clear:both"></div><br>
+	<br><div style="clear:both"></div><br>
+</div>
 
 {% endblock %}

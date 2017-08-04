@@ -1,68 +1,12 @@
 {% extends "layout.html" %} {% block content %}
 
-<style>
-.modal-dialog-big {
-    width: 95%;
-    margin-left: 3%;
-}
-</style>
-
-
-
- <style>
-.test-img {
-    margin-top:27px;
-}
-.set-test-img {
-    background:#fff;
-    color:#ddd;
-    border-radius:500%;
-    padding:11px;
-    font-size:108px;
-    border: solid #ddd 14px;
-}
-.tst-img {
-    margin-top:27px;
-    margin-bottom:54px;
-}
-
-
-/* clear fix */
-.isotope:after {
-  content: '';
-  display: block;
-  clear: both;
-}
-
-
-
-.element-item {
-  position: relative;
-  float: left;
-  width: 100px;
-  height: 100px;
-  margin: 5px;
-  background: #888;
-  color: #262524;
-}
-
-.element-item img {
-    width: 100px;
-    height: 100px;
-}
-
-.element-item > * {
-  margin: 0;
-  padding: 0;
-}
-</style>
-
-
 <div class="col-xs-12 col-sm-12 col-md-12">
     <div class="page-header">
         {% if isProjectOwner == True %}
-        <h1><i class="fa fa-cogs"></i> Gestionați antrenamentul <small>{{ trainingName }}</small></h1> {% else %}
-        <h1><i class="fa fa-cogs"></i> Vizualizați antrenamentul <small>{{ trainingName }}</small></h1> {% endif %}
+        <h1><i class="fa fa-cogs"></i> Gestionați antrenamentul <small>{{ trainingName }}</small></h1> 
+        {% else %}
+        <h1><i class="fa fa-cogs"></i> Vizualizați antrenamentul <small>{{ trainingName }}</small></h1> 
+        {% endif %}
     </div>
     <div class="row">
         <ol class="breadcrumb bread-primary">
@@ -76,14 +20,17 @@
             {% endif %}
         </ol>
     </div>
-    {% if isProjectOwner == True %} {% else %}
+    {% if isProjectOwner == True %} 
+
+    {% else %}
     <div class="alert alert-danger">
         <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
     </div>
-    <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a> {% endif %}
+    <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a> 
+    {% endif %}
     <div style="clear:both"></div>
     <br>
-    <div class="row">
+    <div class="col-md-12">
         <div class="col-md-4">
 
             <div class="well">
@@ -116,13 +63,11 @@
     
         </div>
         <div class="col-md-8">
-            {% if isProjectOwner == True %}
             <div class="btn-group pull-right">
+            {% if isProjectOwner == True %}
             <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă test</button>
             {% endif %}
-
             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#formViewNetworkTestsModal"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează testele existente</button>
-
             </div>
             <div style="clear:both"></div><br>
 
@@ -195,7 +140,10 @@
         </div>
     </div>
 
-    <br><div style="clear:both"></div><hr>
+    <br><div style="clear:both"></div><br>
+
+{% if isProjectOwner == True %} 
+<hr>
 
         <section class="widget-type2">
         <header>
@@ -205,11 +153,10 @@
         </header>
         
         <div class="widget-type2-body">
-            <p><strong>Această secțiune</strong> vă permite să gestionați antrenamentele si testele din cadrul proiectului selectat. Puteți adăuga fișiere noi de configurare a rețelei sau antrenamnetelor, gestiona seturile de date și bineînțeles puteți iniția antrenamente noi sau pur și simplu vizualizați detalii legate de fișierele deja generate.</p>
+            <p><strong>Această secțiune</strong> vă permite să vizualizați statisticile și să gestionați testele din cadrul antrenamentul curent. Puteți adăuga teste noi sau inspecta evoluția antrenamentului la diferite momente.</p>
             <ul class="text-list">
-                <li><strong>Adaugă fișier de configurare a rețelei neurale</strong> - de completat;</li>
-                <li><strong>Adaugă fișier de configurare al modului de antrenament</strong> - de completat;</li>
-                <li><strong>Efectuează un antrenament nou</strong> - de completat;</li>
+                <li><strong>Adaugă test</strong> - puteți adăuga un nou test pentru a observa cum funcționează rețeaua neurală pe imaginea selectată;</li>
+                <li><strong>Vizualizează testele existente</strong> - aveți posibilitatea de a vizualiza oricând testele anterioare si vedea cum imaginea a fost procesată prin filtrele rețelei neurale de convoluție;</li>
             </ul>
 
             <br>
@@ -221,8 +168,6 @@
     </section>
 
     <br><div style="clear:both"></div><br>
-
-
 
 
 
@@ -275,6 +220,7 @@
             </div>
         </div>
     </div>
+{% endif %}
 
 
 <!-- Modal add test -->
@@ -305,7 +251,9 @@
                                             <td> {{ test }}</td>
                                             <td class="text-right">
                                                 <button name="buttonViewTestInfo" value="/get_data/{{ projectName }}/{{ trainingName }}/{{ test }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</button>
+                                                {% if isProjectOwner == True %} 
                                                 <a href="{{ url_for('deleteTest', projectName = projectName, trainingName = trainingName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
