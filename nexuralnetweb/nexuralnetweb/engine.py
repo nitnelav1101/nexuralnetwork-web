@@ -165,7 +165,7 @@ def getResult(projectName, trainingName, testName):
 		resultMessage = "Rezultatul este: "
 		resultTypeMessage = "regresie"
 
-	resultMessage = resultMessage + data['best_class']
+	resultMessage = resultMessage + data['best_class_0']
 	return resultTypeMessage, resultMessage
 
 
