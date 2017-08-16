@@ -370,6 +370,7 @@ def addNetworkTraining(projectName):
             infoDataFile = os.path.join(trainingPath, "info.json")
             engine.createDirectory(trainingPath)
             engine.createDirectory(outputTrainerInfoFolderPath)
+            engine.createDirectory(os.path.join(trainingPath, "tests"))
 
             datasetName = engine.cleanAlphanumericString(form.trainingDataSet.data)
             networkArhitecture = form.networkArhitecture.data
