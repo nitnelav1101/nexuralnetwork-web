@@ -1,9 +1,8 @@
+import os, json
 import nexuralnet
 from nexuralnetweb import app
 import numpy as np
 import cv2
-import os
-import json
 
 
 def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):

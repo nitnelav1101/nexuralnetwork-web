@@ -1,14 +1,9 @@
-from flask import session
-from nexuralnetweb import app
-import os
-import fnmatch
-from werkzeug.utils import secure_filename, MultiDict
-import nexuralnetengine
-import json
-import re
-import StringIO
-import base64
+import os, fnmatch, json, re, StringIO, base64
 import matplotlib.pyplot as plt
+from flask import session
+from werkzeug.utils import secure_filename, MultiDict
+from nexuralnetweb import app
+import nexuralnetengine
 
 
 def addProject(projectName, accessCode):
@@ -40,7 +35,7 @@ def getAllProjectDatasets(projectName):
 	return dirs
 
 
-def getAllTestFilters(projectName, trainingName, testName):
+def getTestImageFilters(projectName, trainingName, testName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'filters'))]
 	dic = []
 	filtersNumSet = set()
@@ -150,7 +145,7 @@ def addTest(projectName, trainingName, testName, networkArhitecture, trainedFile
     nexuralnetengine.runNetwork(networkArhitecturePath, trainedFilePath, completeFilename, readType, filtersFolderPath, resultFilePath)
 
 
-def getResult(projectName, trainingName, testName):
+def getTestResult(projectName, trainingName, testName):
 	path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'result.json')
 	data = json.load(open(path))
 	resultType = data['result_type']

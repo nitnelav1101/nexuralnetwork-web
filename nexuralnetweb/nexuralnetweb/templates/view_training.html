@@ -250,7 +250,7 @@
                                         <tr>
                                             <td> {{ test }}</td>
                                             <td class="text-right">
-                                                <button name="buttonViewTestInfo" value="/get_data/{{ projectName }}/{{ trainingName }}/{{ test }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</button>
+                                                <button name="buttonViewTestInfo" value="/services/getTestResult/{{ projectName }}/{{ trainingName }}/{{ test }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</button>
                                                 {% if isProjectOwner == True %} 
                                                 <a href="{{ url_for('deleteTest', projectName = projectName, trainingName = trainingName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
                                                 {% endif %}
@@ -340,7 +340,7 @@
         function getTrainingStats() {
             epochNum = $('.selectEpochNumTrainingStats').find(":selected").text();
             classNum = $('.selectClassNumTrainingStats').find(":selected").text();
-            queryUrl = "/getTrainingStats/{{ projectName }}/{{ trainingName }}/"+ epochNum + "/" + classNum;
+            queryUrl = "/services/getTrainingStats/{{ projectName }}/{{ trainingName }}/"+ epochNum + "/" + classNum;
 
             $.ajax({
                 type: 'GET',

@@ -1,28 +1,25 @@
+import os, shutil, json
 from flask import flash, redirect, render_template, request, url_for, session, send_file, send_from_directory, jsonify
-from werkzeug.utils import secure_filename, MultiDict
+from werkzeug.utils import secure_filename
 from nexuralnetweb import app
+import engine, nexuralnetengine, webtasks
 from forms import CreateProjectForm, SecureProjectForm, AddTrainingFileForm, AddNetworkFileForm, AddNetworkTestForm, AddNetworkTrainingForm, AddPredefinedDatSetForm
-import engine
-import os
-import shutil
-import json
-import nexuralnet
-import threading
-import nexuralnetengine
-from nexuralnetweb import celery
 
 
-@app.route('/get_data/<string:projectName>/<string:trainingName>/<string:testName>', methods=['GET'])
-def get_data(projectName, trainingName, testName):
-    filtersImages, filtersNumSet = engine.getAllTestFilters(projectName, trainingName, testName)
-    resultType, resultMessage = engine.getResult(projectName, trainingName, testName)
-    return jsonify({'data': render_template('test_net_filters.html', projectName = projectName, trainingName = trainingName, testName = testName, filtersImages = filtersImages, filtersNumSet = filtersNumSet, resultType = resultType, resultMessage = resultMessage)})
+# -------------------------------------------------------------------------------------
+#### AJAX services
+# -------------------------------------------------------------------------------------
+@app.route('/services/getTestResult/<string:projectName>/<string:trainingName>/<string:testName>', methods=['GET'])
+def getTestResult(projectName, trainingName, testName):
+    filtersImages, filtersByLayersNum = engine.getTestImageFilters(projectName, trainingName, testName)
+    resultType, resultMessage = engine.getTestResult(projectName, trainingName, testName)
+    return jsonify({'data': render_template('display_test_results_ajax.html', projectName = projectName, trainingName = trainingName, testName = testName, filtersImages = filtersImages, filtersByLayersNum = filtersByLayersNum, resultType = resultType, resultMessage = resultMessage)})
 
 
-@app.route('/getTrainingStats/<string:projectName>/<string:trainingName>/<int:epochNum>/<int:classNum>', methods=['GET'])
+@app.route('/services/getTrainingStats/<string:projectName>/<string:trainingName>/<int:epochNum>/<int:classNum>', methods=['GET'])
 def getTrainingStats(projectName, trainingName, epochNum, classNum):
     trainingStats, validationStats = nexuralnetengine.getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
-    return jsonify({'data': render_template('training_stats.html', trainingStats = trainingStats, validationStats = validationStats)})
+    return jsonify({'data': render_template('display_training_stats_ajax.html', trainingStats = trainingStats, validationStats = validationStats)})
 
 
 # -------------------------------------------------------------------------------------
@@ -235,8 +232,8 @@ def deleteTrainingFile(projectName, trainingConfigFile):
 
 
 
-@app.route('/getFileFromTest/<string:projectName>/<string:trainingName>/<string:testName>/<path:filename>')
-def getFileFromTest(projectName, trainingName, testName, filename):
+@app.route('/getTestFilterImage/<string:projectName>/<string:trainingName>/<string:testName>/<path:filename>')
+def getTestFilterImage(projectName, trainingName, testName, filename):
     path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
     return send_from_directory(path, filename)
 
@@ -418,20 +415,9 @@ def addNetworkTraining(projectName):
             with open(infoDataFile, 'w') as outfile:
                 json.dump(infoData, outfile)
 
-            result = trainQuery.delay(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDS, trainingDS)
+            result = webtasks.trainNetworkTask.delay(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDS, trainingDS)
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)
-
-
-@celery.task()
-def trainQuery(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDataSource, targetDataSource):
-	print 'Started training...'
-	if trainingDataSource == "MNIST_DATA_FILE":
-		internalTrainingDataSource = nexuralnet.trainer.trainingDataSource.MNIST_DATA_FILE
-		internalTargetDataSource = nexuralnet.trainer.targetDataSource.MNIST_DATA_FILE
-	trainer = nexuralnet.trainer(networkArhitecturePath, trainingFilePath)
-	trainer.train(dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, internalTrainingDataSource, internalTargetDataSource)
-	print 'Finished training.'
 
 
 @app.route('/viewTraining/<string:projectName>/<string:trainingName>')
@@ -441,26 +427,35 @@ def viewTraining(projectName, trainingName):
     trainedFileExists =  engine.trainedFileExists(projectName, trainingName)
     formAddNetworkTest = AddNetworkTestForm()
 
+    # Get data from the info training file
     infoTrainingDataPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info.json")
     infoTrainingData = {}
-    with open(infoTrainingDataPath) as jsonData:
-        d = json.load(jsonData)
-        infoTrainingData['network_file'] = d['network_file']
-        infoTrainingData['training_file'] = d['training_file']
-        infoTrainingData['dataset'] = d['dataset']
+    if engine.fileExists(infoTrainingDataPath) == True:
+        with open(infoTrainingDataPath) as jsonData:
+            d = json.load(jsonData)
+            infoTrainingData['available'] = True
+            infoTrainingData['network_file'] = d['network_file']
+            infoTrainingData['training_file'] = d['training_file']
+            infoTrainingData['dataset'] = d['dataset']
+    else:
+        infoTrainingData['available'] = False
 
     trainingConfigData = {}
     trainingConfigFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], infoTrainingData['training_file'])
-    with open(trainingConfigFilePath) as jsonData:
-        d = json.load(jsonData)
-        trainingConfigData['max_num_epochs'] = d['trainer_settings']['max_num_epochs']
-        trainingConfigData['autosave_training_num_epochs'] = d['trainer_settings']['autosave_training_num_epochs']
-        trainingConfigData['min_learning_rate_threshold'] = d['trainer_settings']['min_learning_rate_threshold']
-        trainingConfigData['min_validation_error_threshold'] = d['trainer_settings']['min_validation_error_threshold']
-        trainingConfigData['training_dataset_percentage'] = d['trainer_settings']['training_dataset_percentage']
-        trainingConfigData['algorithm'] = d['solver']['algorithm']
-        trainingConfigData['learning_rate'] = d['solver']['learning_rate']
-        trainingConfigData['weight_decay'] = d['solver']['weight_decay']
+    if engine.fileExists(trainingConfigFilePath) == True:
+        with open(trainingConfigFilePath) as jsonData:
+            d = json.load(jsonData)
+            trainingConfigData['available'] = True
+            trainingConfigData['max_num_epochs'] = d['trainer_settings']['max_num_epochs']
+            trainingConfigData['autosave_training_num_epochs'] = d['trainer_settings']['autosave_training_num_epochs']
+            trainingConfigData['min_learning_rate_threshold'] = d['trainer_settings']['min_learning_rate_threshold']
+            trainingConfigData['min_validation_error_threshold'] = d['trainer_settings']['min_validation_error_threshold']
+            trainingConfigData['training_dataset_percentage'] = d['trainer_settings']['training_dataset_percentage']
+            trainingConfigData['algorithm'] = d['solver']['algorithm']
+            trainingConfigData['learning_rate'] = d['solver']['learning_rate']
+            trainingConfigData['weight_decay'] = d['solver']['weight_decay']
+    else:
+        trainingConfigData['available'] = False
 
     trainingStats, validationStats, trainingInfo = nexuralnetengine.getTrainingStats(projectName, trainingName)
 
