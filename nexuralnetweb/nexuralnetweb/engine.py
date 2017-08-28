@@ -168,14 +168,6 @@ def cleanAlphanumericString(content):
 	return re.sub(r'\W+', '', content)
 
 
-def getTrainingStatus(projectName, trainingName):
-	return 'train'
-
-
-def trainedFileExists(projectName, trainingName):
-	return False
-
-
 def getPlotFromData(data, plotTitle):
     img = StringIO.StringIO()
     plt.plot(data)
