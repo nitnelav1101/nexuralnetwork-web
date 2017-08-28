@@ -13,16 +13,18 @@ from forms import CreateProjectForm, SecureProjectForm, AddTrainingFileForm, Add
 # -------------------------------------------------------------------------------------
 @app.route('/services/getTestResult/<string:projectName>/<string:trainingName>/<string:testName>', methods=['GET'])
 def getTestResult(projectName, trainingName, testName):
-    filtersImages, filtersByLayersNum = engine.getTestImageFilters(projectName, trainingName, testName)
-    resultType, resultMessage = engine.getTestResult(projectName, trainingName, testName)
-    return jsonify({'data': render_template('display_test_results_ajax.html', projectName = projectName, trainingName = trainingName, testName = testName, filtersImages = filtersImages, filtersByLayersNum = filtersByLayersNum, resultType = resultType, resultMessage = resultMessage)})
+    result = {}
+    result['resultType'], result['resultMessage'] = engine.getTestResult(projectName, trainingName, testName)
+    result['layerFiltersImages'], result['filtersByLayerNum'] = engine.getTestResultInternalNetFilters(projectName, trainingName, testName)
+    return jsonify({'data': render_template('display_test_results_ajax.html', projectName = projectName, trainingName = trainingName, testName = testName, result = result)})
 
 
 
 @app.route('/services/getTrainingStats/<string:projectName>/<string:trainingName>/<int:epochNum>/<int:classNum>', methods=['GET'])
 def getTrainingStats(projectName, trainingName, epochNum, classNum):
-    trainingStats, validationStats = nexuralnetengine.getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
-    return jsonify({'data': render_template('display_training_stats_ajax.html', trainingStats = trainingStats, validationStats = validationStats)})
+    result = {}
+    result['trainingStats'], result['validationStats'] = nexuralnetengine.getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
+    return jsonify({'data': render_template('display_training_stats_ajax.html', result = result)})
 
 
 

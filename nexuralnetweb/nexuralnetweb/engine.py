@@ -35,7 +35,7 @@ def getAllProjectDatasets(projectName):
 	return dirs
 
 
-def getTestImageFilters(projectName, trainingName, testName):
+def getTestResultInternalNetFilters(projectName, trainingName, testName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'filters'))]
 	dic = []
 	filtersNumSet = set()
