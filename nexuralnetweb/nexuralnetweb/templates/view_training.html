@@ -1,360 +1,41 @@
 {% extends "layout.html" %} {% block content %}
 
-<div class="col-xs-12 col-sm-12 col-md-12">
-    <div class="page-header">
-        {% if isProjectOwner == True %}
-        <h1><i class="fa fa-cogs"></i> Gestionați antrenamentul <small>{{ trainingName }}</small></h1> 
-        {% else %}
-        <h1><i class="fa fa-cogs"></i> Vizualizați antrenamentul <small>{{ trainingName }}</small></h1> 
-        {% endif %}
-    </div>
-    <div class="row">
-        <ol class="breadcrumb bread-primary">
-            <li><i class="fa fa-home" aria-hidden="true"></i> <a href="{{ url_for('dashboard') }}">PANOU DE CONTROL</a></li>
-            {% if isProjectOwner == True %}
-            <li class="active"><a href="{{ url_for('project', projectName = projectName) }}">GESTIONARE PROIECT</a></li>
-            <li class="active">GESTIONARE ANTRENAMENT</li>
-            {% else %}
-            <li class="active"><a href="{{ url_for('project', projectName = projectName) }}">VIZUALIZARE PROIECT</a></li>
-            <li class="active">VIZUALIZARE ANTRENAMENT</li>
-            {% endif %}
-        </ol>
-    </div>
-    {% if isProjectOwner == True %} 
-
-    {% else %}
-    <div class="alert alert-danger">
-        <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
-    </div>
-    <a href="{{ url_for('secureProject', projectName = projectName) }}" class="btn btn-block btn-danger">Sunt proprietarul proiectului</a> 
-    {% endif %}
-    <div style="clear:both"></div>
-    <br>
-    <div class="col-md-12">
-        <div class="col-md-4">
-
-            <div class="well">
-                <b><i class="fa fa-area-chart" aria-hidden="true"></i> Status:</b> antrenament complet
-                <br>
-                <b><i class="fa fa-tag" aria-hidden="true"></i> Tip problemă rezolvată:</b> clasificare multiplă
-                <br>
-                <b><i class="fa fa-clock-o" aria-hidden="true"></i> Număr de epoci:</b> {{ trainingInfo['epochs_num'] }}
-                <br>
-                <b><i class="fa fa-power-off" aria-hidden="true"></i> Oprire antrenament:</b> a fost atinsă limita maximă a ratei de învățare
-                <br>
-            </div>
-
-        <div style="clear:both"></div><br>
-
-        <h3><b><span class="text-info"><i class="fa fa-cog" aria-hidden="true"></i> Opțiuni antrenament:</span></b></h3>
-        <div style="padding-left: 25px;">
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Număr maxim de epoci:</b> {{ trainingConfigData['max_num_epochs'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Epoci parcurse pentru salvare automată: </b> {{ trainingConfigData['autosave_training_num_epochs'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a ratei de învățare:</b> {{ trainingConfigData['min_learning_rate_threshold'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a erorii de validare:</b> {{ trainingConfigData['min_validation_error_threshold'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Procent dimensiune set de antrenament</b> {{ trainingConfigData['training_dataset_percentage'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Algoritm actualizare ponderi:</b> {{ trainingConfigData['algorithm'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Rata de învățare de pornire:</b> {{ trainingConfigData['learning_rate'] }} <br>
-            <b><i class="fa fa-caret-right" aria-hidden="true"></i> Valoare de penalizare a ponderilor:</b> {{ trainingConfigData['weight_decay'] }}<br>
-        </div>
-
-        <div style="clear:both"></div><br>
-  
-    
-        </div>
-        <div class="col-md-8">
-            <div class="btn-group pull-right">
-            {% if isProjectOwner == True %}
-            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă test</button>
-            {% endif %}
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#formViewNetworkTestsModal"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează testele existente</button>
-            </div>
-            <div style="clear:both"></div><br>
-
-            <!-- tabs right -->
-      <div class="tabbable tabs-right">
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#1" data-toggle="tab">Evoluția ratei de învățare</a></li>
-          <li><a href="#2" data-toggle="tab">Grafic eroare medie antrenament</a></li>
-          <li><a href="#3" data-toggle="tab">Grafic eroare medie validare</a></li>
-        </ul>
-        <div class="tab-content">
-         <div class="tab-pane active" id="1">
-            <img src="data:image/png;base64, {{ plot_learning_rate_data }}" class="img-responsive"> 
-         </div>
-         <div class="tab-pane" id="2">
-            <img src="data:image/png;base64, {{ plot_epoch_mean_error_data }}" class="img-responsive"> 
-         </div>
-         <div class="tab-pane" id="3">
-            <img src="data:image/png;base64, {{ plot_validation_mean_error }}" class="img-responsive"> 
-         </div>
-        </div>
-      </div>
-      <!-- /tabs -->
-        </div>
-
-         <div style="clear:both"></div><hr>
-
-
-        <b>
-            <span class="text-warning"> Afișează statistici pentru epoca
-                <select class="selectEpochNumTrainingStats">
-                    {% for i in range(0, trainingInfo['epochs_num']|int) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select> 
-                <b>și clasa</b>
-                <select class="selectClassNumTrainingStats">
-                    {% for i in range(0, validationStats|length) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select>
-            </span>
-        </b>
-
-        <div style="clear:both"></div>
-
-        <div class="trainingStatsContent">
-            <div class="col-md-5">
-                <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de antrenament</h3>
-                <div style="font-size: 17px;">
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingStats[0]['recall'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingStats[0]['precision'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingStats[0]['f1score'] }}
-                <br>
-                </div>
-            </div>
-            <div class="col-md-5">
-                <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de validare</h3>
-                <div style="font-size: 17px;">
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ validationStats[0]['recall'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ validationStats[0]['precision'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ validationStats[0]['f1score'] }}
-                <br>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <br><div style="clear:both"></div><br>
-
-{% if isProjectOwner == True %} 
-<hr>
-
-        <section class="widget-type2">
-        <header>
-            <h2>
-                Instrucțiuni de utilizare:
-            </h2>
-        </header>
-        
-        <div class="widget-type2-body">
-            <p><strong>Această secțiune</strong> vă permite să vizualizați statisticile și să gestionați testele din cadrul antrenamentul curent. Puteți adăuga teste noi sau inspecta evoluția antrenamentului la diferite momente.</p>
-            <ul class="text-list">
-                <li><strong>Adaugă test</strong> - puteți adăuga un nou test pentru a observa cum funcționează rețeaua neurală pe imaginea selectată;</li>
-                <li><strong>Vizualizează testele existente</strong> - aveți posibilitatea de a vizualiza oricând testele anterioare si vedea cum imaginea a fost procesată prin filtrele rețelei neurale de convoluție;</li>
-            </ul>
-
-            <br>
-            <p>
-                <i>Dacă întâmpinați probleme (erori) la una dintre opțiunile platformei vă rugăm să ne contactați! Vă mulțumim!</i>
-            </p>
-            
-        </div>
-    </section>
-
-    <br><div style="clear:both"></div><br>
-
-
-
-
-    <!-- Modal add test -->
-    <div class="modal fade" id="formAddNetworkTestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Formular adaugare test nou</h4>
-                </div>
-                <form class="form form-horizontal" action="{{ url_for('addNetworkTest', projectName = projectName, trainingName = trainingName) }}" method="post" enctype="multipart/form-data" name="addNetworkTest">
-                    {{ formAddNetworkTest.hidden_tag() }}
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                {{ formAddNetworkTest.testName.label }}
-                                <br> {{ formAddNetworkTest.testName(class_="form-control") }}
-                                <br>
-                            </div>
-                            <div class="col-md-6">
-                                {{ formAddNetworkTest.networkArhitecture.label }}
-                                <br> {{ formAddNetworkTest.networkArhitecture(class_="form-control") }}
-                                <br>
-                            </div>
-                            <div class="col-md-6">
-                                {{ formAddNetworkTest.trainedFile.label }}
-                                <br> {{ formAddNetworkTest.trainedFile(class_="form-control") }}
-                                <br>
-                            </div>
-                            <div class="col-md-6">
-                                {{ formAddNetworkTest.imageFile.label }}
-                                <br> {{ formAddNetworkTest.imageFile(class_="form-control") }}
-                                <br>
-                            </div>
-                            <div class="col-md-6">
-                                {{ formAddNetworkTest.readType.label }}
-                                <br> {{ formAddNetworkTest.readType(class_="form-control") }}
-                                <br>
-                            </div>
-                        </div>
-                        <div style="clear:both"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-                        {{ formAddNetworkTest.submit(id_="button", class_="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-{% endif %}
-
-
-<!-- Modal add test -->
-    <div class="modal fade" id="formViewNetworkTestsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Lista testelor efectuate</h4>
-                </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Nume test</th>
-                                            <th class="text-right"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if availableTests|length == 0 %}
-                                        <tr>
-                                            <td>nu sunt teste disponibile</td>
-                                        </tr>
-                                        {% endif %} {% for test in availableTests %}
-                                        <tr>
-                                            <td> {{ test }}</td>
-                                            <td class="text-right">
-                                                <button name="buttonViewTestInfo" value="/services/getTestResult/{{ projectName }}/{{ trainingName }}/{{ test }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</button>
-                                                {% if isProjectOwner == True %} 
-                                                <a href="{{ url_for('deleteTest', projectName = projectName, trainingName = trainingName, testName = test) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div style="clear:both"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-                    </div>
-            </div>
-        </div>
-    </div>
-
-
-<!-- Modal view test -->
-    <div class="modal fade" id="displayTestInfos" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-dialog-big" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Rezultate test</h4>
-                </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div id="viewTestContent" class="col-md-12"></div>
-                        </div>
-                        <div style="clear:both"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-                        
-                    </div>
-              
-            </div>
-        </div>
-    </div>
-
-    
+<div class="trainingStatsPage">
+{{ htmlPage }}
+</div>
 
 <script>
     $(document).ready(function() {
-        $("button[name^=buttonViewTestInfo]").click(function(e) {
-        e.preventDefault();
-        queryUrl = $(this).attr("value");
+        var isTrainingDone =  false;
+
+        function updateTrainingPage() {
+            updatePageQueryUrl = "/services/UpdateTrainingPage/{{ projectName }}/{{ trainingName }}/json";
+            checkTrainingStatusQueryUrl = "/services/isTrainingDone/{{ projectName }}/{{ trainingName }}";
+
             $.ajax({
                 type: 'GET',
                 cache: false,
-                url: queryUrl, 
+                url: checkTrainingStatusQueryUrl, 
                 success: function(resp){
-                    $( "#viewTestContent" ).empty();
-                    $('#viewTestContent').html(resp.data);
-                    $('#displayTestInfos').modal('toggle');
+                    // alert(resp.data);
+                    if(resp.data == false) {
+                        $.ajax({
+                            type: 'GET',
+                            cache: false,
+                            url: updatePageQueryUrl, 
+                            success: function(resp){
+                                $('.trainingStatsPage').empty();
+                                $('.trainingStatsPage').html(resp.data);
+                                // alert("adas");
+                            }
+                        });
+                    }
                 }
-            }).then(function(){
-                $(".filters-select").on( 'change', function() {
-                    var selectedValue = this.value;
-                    
-                    if(selectedValue == "all")
-                    {
-                        $('.filter').show('1000');
-                    }
-                    else
-                    {
-                        $(".filter").not('.'+selectedValue).hide('3000');
-                        $('.filter').filter('.'+selectedValue).show('3000');  
-                    }
-                });
             });
-        });
-
-
-
-        $(".selectEpochNumTrainingStats").on( 'change', function() {
-            getTrainingStats();
-        });
-
-        $(".selectClassNumTrainingStats").on( 'change', function() {
-            getTrainingStats();
-        });
-
-        function getTrainingStats() {
-            epochNum = $('.selectEpochNumTrainingStats').find(":selected").text();
-            classNum = $('.selectClassNumTrainingStats').find(":selected").text();
-            queryUrl = "/services/getTrainingStats/{{ projectName }}/{{ trainingName }}/"+ epochNum + "/" + classNum;
-
-            $.ajax({
-                type: 'GET',
-                cache: false,
-                url: queryUrl, 
-                success: function(resp){
-                    $( ".trainingStatsContent" ).empty();
-                    $('.trainingStatsContent').html(resp.data);
-                }
-            })
         }
+
+        setInterval(updateTrainingPage, 3000);
     }); 
 </script>
-
-</div>
 
 {% endblock %}

@@ -1,9 +1,33 @@
 import os, fnmatch, json, re, StringIO, base64
+import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from flask import session
 from werkzeug.utils import secure_filename, MultiDict
 from nexuralnetweb import app
 import nexuralnetengine
+
+
+
+def createDirectory(dirPath):
+    if not os.path.isdir(dirPath) and not os.path.exists(dirPath):
+    	os.makedirs(dirPath)
+
+
+
+def fileExists(dirPath):
+	return os.path.exists(dirPath)
+
+
+
+def dirExists(currentTestPath):
+	return os.path.isdir(currentTestPath) and os.path.exists(currentTestPath)
+
+
+
+def cleanAlphanumericString(content):
+	return re.sub(r'\W+', '', content)
+
 
 
 def addProject(projectName, accessCode):
@@ -25,14 +49,17 @@ def addProject(projectName, accessCode):
         return False
 
 
+
 def getAllProjects():
 	dirs = [d for d in os.listdir(app.config['BASE_PROJECTS_FOLDER_NAME']) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], d))]
 	return dirs
 
 
+
 def getAllProjectDatasets(projectName):
 	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], d))]
 	return dirs
+
 
 
 def getTestResultInternalNetFilters(projectName, trainingName, testName):
@@ -45,6 +72,8 @@ def getTestResultInternalNetFilters(projectName, trainingName, testName):
 		filtersNumSet.add(layerNum)
 	return dic, list(filtersNumSet)
 
+
+
 def getAllTrainings(projectName):
 	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
 	dic = MultiDict()
@@ -53,12 +82,14 @@ def getAllTrainings(projectName):
 	return dic
 
 
+
 def getAllNetworkArhitecturesFiles(projectName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])) if fnmatch.fnmatch(f, '*.json')]
 	dic = MultiDict()
 	for x in files:
 		dic.add(os.path.basename(x), os.path.basename(x))
 	return dic
+
 
 
 def getAllTriningFiles(projectName):
@@ -109,19 +140,6 @@ def checkAccessCode(projectName, accessCode):
 
 
 
-def createDirectory(dirPath):
-    if not os.path.isdir(dirPath) and not os.path.exists(dirPath):
-    	os.makedirs(dirPath)
-
-
-def fileExists(dirPath):
-	return os.path.exists(dirPath)
-
-
-def dirExists(currentTestPath):
-	return os.path.isdir(currentTestPath) and os.path.exists(currentTestPath)
-
-
 def addTest(projectName, trainingName, testName, networkArhitecture, trainedFile, formFile, readType):
     currentTestPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName)
     resultFilePath = os.path.join(currentTestPath, 'result.json') 
@@ -145,6 +163,7 @@ def addTest(projectName, trainingName, testName, networkArhitecture, trainedFile
     nexuralnetengine.runNetwork(networkArhitecturePath, trainedFilePath, completeFilename, readType, filtersFolderPath, resultFilePath)
 
 
+
 def getTestResult(projectName, trainingName, testName):
 	path = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, app.config['TESTS_FILES_FOLDER_NAME'], testName, 'result.json')
 	data = json.load(open(path))
@@ -164,16 +183,184 @@ def getTestResult(projectName, trainingName, testName):
 	return resultTypeMessage, resultMessage
 
 
-def cleanAlphanumericString(content):
-	return re.sub(r'\W+', '', content)
 
-
-def getPlotFromData(data, plotTitle):
+def getPlotFromData(data, xlabel, ylabel, legendTitles = []):
     img = StringIO.StringIO()
-    plt.plot(data)
-    plt.xlabel(plotTitle)
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    displayLegend = (len(data) > 1) and (len(data) == len(legendTitles))
+    for i in range(0, len(data)):
+    	if displayLegend == True:
+    		plt.plot(data[i], label=legendTitles[i])
+    	else:
+    		plt.plot(data[i])
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(loc='upper right')
+    plt.tight_layout()
     plt.savefig(img, format='png')
     img.seek(0)
     resPlot = base64.b64encode(img.getvalue())
     plt.clf()
     return resPlot
+
+
+def getTrainingInfoData(projectName, trainingName):
+	trainingInfoData = {}
+
+	# Get info about this web training project
+	trainingInfoData['webTrainingProjectDetails'] = getWEBProjectTrainingDetails(projectName, trainingName)
+
+	# Get info about training configuration
+	if trainingInfoData['webTrainingProjectDetails']['available'] == True:
+		trainingInfoData['trainingConfigurationData'] = getTrainingConfigurationData(projectName, trainingInfoData['webTrainingProjectDetails']['training_file'])
+
+	# Get training stats
+	trainingInfoData['trainingStats'] = getTrainingStats(projectName, trainingName)
+
+	return trainingInfoData
+
+
+
+def getWEBProjectTrainingDetails(projectName, trainingName):
+	webTrainingProjectDetailsFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info.json")
+	webTrainingProjectDetails = {}
+
+	if fileExists(webTrainingProjectDetailsFilePath) == True:
+		with open(webTrainingProjectDetailsFilePath) as jsonData:
+			data = json.load(jsonData)
+			webTrainingProjectDetails['available'] = True
+			webTrainingProjectDetails['network_file'] = data['network_file']
+			webTrainingProjectDetails['training_file'] = data['training_file']
+			webTrainingProjectDetails['dataset'] = data['dataset']
+			webTrainingProjectDetails['timestamp'] = data['timestamp']
+	else:
+		webTrainingProjectDetails['available'] = False
+
+	return webTrainingProjectDetails
+
+
+def isTrainingDone(projectName, trainingName):
+	trainerInfoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info", "trainerInfo.json")
+
+	if fileExists(trainerInfoFilePath) == True:
+		with open(trainerInfoFilePath, 'r') as dataFile:
+			data = json.load(dataFile)
+			if 'stop_condition' in data:
+				return True
+			else:
+				return False
+	return False
+
+
+def getTrainingConfigurationData(projectName, trainingConfigFileName):
+	trainingConfigurationData = {}
+	trainingConfigurationFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFileName)
+
+	if fileExists(trainingConfigurationFilePath) == True:
+		with open(trainingConfigurationFilePath) as jsonData:
+			d = json.load(jsonData)
+			trainingConfigurationData['available'] = True
+			trainingConfigurationData['max_num_epochs'] = d['trainer_settings']['max_num_epochs']
+			trainingConfigurationData['autosave_training_num_epochs'] = d['trainer_settings']['autosave_training_num_epochs']
+			trainingConfigurationData['min_learning_rate_threshold'] = d['trainer_settings']['min_learning_rate_threshold']
+			trainingConfigurationData['min_validation_error_threshold'] = d['trainer_settings']['min_validation_error_threshold']
+			trainingConfigurationData['training_dataset_percentage'] = d['trainer_settings']['training_dataset_percentage']
+			trainingConfigurationData['algorithm'] = d['solver']['algorithm']
+			trainingConfigurationData['learning_rate'] = d['solver']['learning_rate']
+			trainingConfigurationData['weight_decay'] = d['solver']['weight_decay']
+	else:
+		trainingConfigurationData['available'] = False
+
+	return trainingConfigurationData
+
+
+
+def getTrainingStats(projectName, trainingName, epochNum = -1, classNum = -1):
+	trainingStats = {}
+	trainerInfoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info", "trainerInfo.json")
+
+	if fileExists(trainerInfoFilePath) == True:
+		with open(trainerInfoFilePath, 'r') as dataFile:
+			data = json.load(dataFile)
+			trainingStats['available'] = True
+			trainingStats['result_type'] = data['result_type']
+			if 'stop_condition' in data:
+				trainingStats['stop_condition'] = data['stop_condition']
+				trainingStats['training_status'] = "antrenament complet"
+			else:
+				trainingStats['training_status'] = "in curs de antrenare"
+
+			trainingStats['epochs_num'], trainingStats['clases_num'], trainingStats['trainingDatasetStats'], trainingStats['validationDatasetStats'] = getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
+
+			learningRateData = []
+			trainingDatasetMeanErrorData = []
+			validationDatasetMeanErrorData = []
+
+			for x in range(0, int(trainingStats['epochs_num'])):
+				learningRateData.append(float(data['epochs']['epoch' + str(x)]['learning_rate']))
+				trainingDatasetMeanErrorData.append(float(data['epochs']['epoch' + str(x)]['training_mean_error']))
+				validationDatasetMeanErrorData.append(float(data['epochs']['epoch' + str(x)]['validation_mean_error']))
+
+			learningRateStats = []
+			epochMeanErrorStats = []
+			learningRateStats.append(learningRateData)
+			epochMeanErrorStats.append(trainingDatasetMeanErrorData)
+			epochMeanErrorStats.append(validationDatasetMeanErrorData)
+
+			trainingStats['plot_learning_rate'] = getPlotFromData(learningRateStats, 'Epoca', 'Rata de invatare')
+			trainingStats['plot_epoch_mean_error'] = getPlotFromData(epochMeanErrorStats, 'Epoca', 'Eroarea medie', ["setul de antrenament", "setul de validare"])
+	else:
+		trainingStats['available'] = False
+
+	return trainingStats
+
+
+
+
+def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
+	dataInfoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info", "trainerInfo.json")
+
+	totalEpochsNum = 0
+	totalClassesNum = 0
+
+	with open(dataInfoFilePath, 'r') as dataFile:
+		data = json.load(dataFile)
+		totalEpochsNum = str(len(data['epochs'].items()) - 1)
+
+		if epochNum == -1:
+			epochNum = totalEpochsNum
+		if classNum == -1:
+			classNum = 0
+
+		trainingDatasetStats = []
+		validationDatasetStats = []
+
+		validationConfusionMatrix = data['epochs']['epoch' + str(epochNum)]['validation_confusion_matrix']
+		validationConfusionMatrixNP = np.array([d for d in validationConfusionMatrix])
+
+		trainingConfusionMatrix = data['epochs']['epoch' + str(epochNum)]['training_confusion_matrix']
+		trainingConfusionMatrixNP = np.array([d for d in trainingConfusionMatrix])
+
+		totalClassesNum = trainingConfusionMatrixNP.shape[0]
+
+		trainingPrecision = trainingConfusionMatrixNP[classNum][classNum] / trainingConfusionMatrixNP.sum(axis=0)[classNum]
+		trainingRecall = trainingConfusionMatrixNP[classNum][classNum] / trainingConfusionMatrixNP[classNum].sum()
+		trainingF1score = 2 * ((trainingPrecision * trainingRecall) / (trainingPrecision + trainingRecall))
+		statstr = {}
+		statstr['recall'] = str(trainingRecall)
+		statstr['precision'] = str(trainingPrecision)
+		statstr['f1score'] = str(trainingF1score)
+		trainingDatasetStats.append(statstr)
+
+		precision = validationConfusionMatrixNP[classNum][classNum] / validationConfusionMatrixNP.sum(axis=0)[classNum]
+		recall = validationConfusionMatrixNP[classNum][classNum] / validationConfusionMatrixNP[classNum].sum()
+		f1score = 2 * ((precision * recall) / (precision + recall))
+		stats = {}
+		stats['class'] = str(classNum)
+		stats['recall'] = str(recall)
+		stats['precision'] = str(precision)
+		stats['f1score'] = str(f1score)
+		validationDatasetStats.append(stats)
+
+	return totalEpochsNum, totalClassesNum, trainingDatasetStats, validationDatasetStats
