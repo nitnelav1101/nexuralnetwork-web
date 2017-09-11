@@ -79,10 +79,14 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="1">
+                    {% if trainingInfoData['trainingStats']['available'] == True %}
                         <img src="data:image/png;base64, {{ trainingInfoData['trainingStats']['plot_learning_rate'] }}" class="img-responsive"> 
+                    {% endif %}
                     </div>
                     <div class="tab-pane" id="2">
+                    {% if trainingInfoData['trainingStats']['available'] == True %}
                         <img src="data:image/png;base64, {{ trainingInfoData['trainingStats']['plot_epoch_mean_error'] }}" class="img-responsive"> 
+                    {% endif %}
                     </div>
                 </div>
             </div>
@@ -93,10 +97,11 @@
         <div style="clear:both"></div><hr>
 
 
+        {% if trainingInfoData['trainingStats']['available'] == True %}
         <b>
             <span class="text-warning"> Afișează statistici pentru epoca
                 <select class="selectEpochNumTrainingStats">
-                    {% for i in range(0, trainingInfoData['trainingStats']['epochs_num']|int) %}
+                    {% for i in range(1, trainingInfoData['trainingStats']['epochs_num']|int + 1) %}
                         <option value="{{ i }}">{{ i }}</option>
                     {% endfor %}
                 </select> 
@@ -108,31 +113,36 @@
                 </select>
             </span>
         </b>
+        {% endif %}
 
         <div style="clear:both"></div>
 
         <div class="trainingStatsContent">
             <div class="col-md-5">
                 <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de antrenament</h3>
+                {% if trainingInfoData['trainingStats']['available'] == True %}
                 <div style="font-size: 17px;">
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['recall'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['precision'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['f1score'] }}
-                <br>
+                    <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['recall'] }}
+                    <br>
+                    <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['precision'] }}
+                    <br>
+                    <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['f1score'] }}
+                    <br>
                 </div>
+                {% endif %}
             </div>
             <div class="col-md-5">
                 <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de validare</h3>
+                {% if trainingInfoData['trainingStats']['available'] == True %}
                 <div style="font-size: 17px;">
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['recall'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['precision'] }}
-                <br>
-                <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['f1score'] }}
-                <br>
+                    <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['recall'] }}
+                    <br>
+                    <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['precision'] }}
+                    <br>
+                    <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['f1score'] }}
+                    <br>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -243,7 +253,8 @@
                                         <tr>
                                             <td>nu sunt teste disponibile</td>
                                         </tr>
-                                        {% endif %} {% for test in availableTests %}
+                                        {% endif %} 
+                                        {% for test in availableTests %}
                                         <tr>
                                             <td> {{ test }}</td>
                                             <td class="text-right">

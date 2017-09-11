@@ -236,6 +236,10 @@ def getWEBProjectTrainingDetails(projectName, trainingName):
 			webTrainingProjectDetails['timestamp'] = data['timestamp']
 	else:
 		webTrainingProjectDetails['available'] = False
+		webTrainingProjectDetails['network_file'] = "-in curs de actualizare"
+		webTrainingProjectDetails['training_file'] = "-in curs de actualizare"
+		webTrainingProjectDetails['dataset'] = "-in curs de actualizare"
+		webTrainingProjectDetails['timestamp'] = "-in curs de actualizare"
 
 	return webTrainingProjectDetails
 
@@ -271,6 +275,14 @@ def getTrainingConfigurationData(projectName, trainingConfigFileName):
 			trainingConfigurationData['weight_decay'] = d['solver']['weight_decay']
 	else:
 		trainingConfigurationData['available'] = False
+		trainingConfigurationData['max_num_epochs'] = "-in curs de actualizare"
+		trainingConfigurationData['autosave_training_num_epochs'] = "-in curs de actualizare"
+		trainingConfigurationData['min_learning_rate_threshold'] = "-in curs de actualizare"
+		trainingConfigurationData['min_validation_error_threshold'] = "-in curs de actualizare"
+		trainingConfigurationData['training_dataset_percentage'] = "-in curs de actualizare"
+		trainingConfigurationData['algorithm'] = "-in curs de actualizare"
+		trainingConfigurationData['learning_rate'] = "-in curs de actualizare"
+		trainingConfigurationData['weight_decay'] = "-in curs de actualizare"
 
 	return trainingConfigurationData
 
@@ -289,6 +301,7 @@ def getTrainingStats(projectName, trainingName, epochNum = -1, classNum = -1):
 				trainingStats['stop_condition'] = data['stop_condition']
 				trainingStats['training_status'] = "antrenament complet"
 			else:
+				trainingStats['stop_condition'] = "momentan indisponibil"
 				trainingStats['training_status'] = "in curs de antrenare"
 
 			trainingStats['epochs_num'], trainingStats['clases_num'], trainingStats['trainingDatasetStats'], trainingStats['validationDatasetStats'] = getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
@@ -297,7 +310,7 @@ def getTrainingStats(projectName, trainingName, epochNum = -1, classNum = -1):
 			trainingDatasetMeanErrorData = []
 			validationDatasetMeanErrorData = []
 
-			for x in range(0, int(trainingStats['epochs_num'])):
+			for x in range(1, int(trainingStats['epochs_num'])):
 				learningRateData.append(float(data['epochs']['epoch' + str(x)]['learning_rate']))
 				trainingDatasetMeanErrorData.append(float(data['epochs']['epoch' + str(x)]['training_mean_error']))
 				validationDatasetMeanErrorData.append(float(data['epochs']['epoch' + str(x)]['validation_mean_error']))
@@ -326,10 +339,10 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 
 	with open(dataInfoFilePath, 'r') as dataFile:
 		data = json.load(dataFile)
-		totalEpochsNum = str(len(data['epochs'].items()) - 1)
+		totalEpochsNum = str(len(data['epochs'].items()))
 
 		if epochNum == -1:
-			epochNum = totalEpochsNum
+			epochNum = str(int(totalEpochsNum))
 		if classNum == -1:
 			classNum = 0
 
