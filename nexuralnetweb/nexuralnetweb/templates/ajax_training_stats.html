@@ -1,0 +1,16 @@
+<div class="col-md-5">
+    <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de antrenament</h3>
+    <div style="font-size: 17px;">
+        <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ result['trainingStats'][0]['recall'] }}<br>
+        <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ result['trainingStats'][0]['precision'] }}<br>
+        <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ result['trainingStats'][0]['f1score'] }}<br>
+    </div>
+</div>
+<div class="col-md-5">
+    <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Statistici pe setul de validare</h3>
+    <div style="font-size: 17px;">
+        <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Recall:</b> {{ result['validationStats'][0]['recall'] }}<br>
+        <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> Precision:</b> {{ result['validationStats'][0]['precision'] }}<br>
+        <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ result['validationStats'][0]['f1score'] }}<br>
+    </div>
+</div>

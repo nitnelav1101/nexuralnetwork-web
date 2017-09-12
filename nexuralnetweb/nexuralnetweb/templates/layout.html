@@ -1,46 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - Test</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="/static/main.css" />
-    <script src="/static/js/modernizr-2.6.2.js"></script>
-</head>
+    <title>{{ title }}</title>
+    <link rel='shortcut icon' type='image/x-icon' href='/static/img/favicon.ico' />
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:600italic,400,800,700,300' rel='stylesheet' type='text/css'>
+    <script src="/static/js/modernizr.js"></script>
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
+      <![endif]-->
+      <style>
+        .top-header { 
+            background: #18171D !important; 
+        }
+        .top-header img.logo { 
+            margin-top: -30px; 
+            margin-bottom: 15px;
+        }
+        .nav-bar {
+            margin-top: 6px;
+        }
+
+        .page-subnav {
+            padding: 0 20px;
+        }
+        .page-subnav a {
+            color: #fff !important;
+        }
+        .page-subnav a:hover {
+            color: #008ed6 !important;
+        }
+    </style>
+
+</head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <!-- ====================================================
+    header section -->
+    <header class="top-header">
         <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a href="/" class="navbar-brand">Application name</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('home') }}">Home</a></li>
-                    <li><a href="{{ url_for('about') }}">About</a></li>
-                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                </ul>
+            <div class="row">
+                <!-- nav starts here -->
+                <div class="col-md-12">                 
+                    <nav class="navbar navbar-default">
+                        <div class="container-fluid nav-bar">
+                            <div class="navbar-header">
+                              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a href="{{ url_for('dashboard') }}"><img src="/static/img/logo.png" alt="" class="img-responsive logo"></a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                          <ul class="nav navbar-nav navbar-right">
+                            <li><a href="{{ url_for('home') }}" style="color: #008ed6; text-transform: uppercase !important;"><i class="fa fa-home"></i> Înapoi la prima pagină</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+</div>
+</header><!-- end of header section -->
+
+<!-- content section starts here -->
+<div class="content">
+    <div class="container">
+        <div class="row">
+
+            <br><div style="clear:both"></div><br>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <br>
+            {% for category, message in messages %}
+            {% if category == 'message' %}
+            <div class="alert alert-warning" role="alert">
+                {% else %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {% endif %}
+                    <b>{{ message }}</b>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
             </div>
         </div>
     </div>
+</div><!-- end of content section -->
 
-    <div class="container body-content">
-        {% block content %}{% endblock %}
-        <hr />
-        <footer>
-            <p>&copy; {{ year }} - neXuralNet Project</p>
-        </footer>
+<!-- footer starts here -->
+<footer class="footer text-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="icons">
+                    <img src="/static/img/nexural-project.png">
+                    
+                </div>
+                <p>COPYRIGHT &copy; 2018 <a href="#"> Un proiect open-source!</a></p>
+            </div>
+        </div>
     </div>
+</footer>
 
-    <!--<script src="/static/js/jquery-1.10.2.js"></script>-->
-    <script src="/static/js/bootstrap.js"></script>
-    {% block scripts %}{% endblock %}
-
+    <!-- script tags
+    ============================================================= -->
+    <script src="/static/js/bootstrap.min.js"></script>
 </body>
 </html>

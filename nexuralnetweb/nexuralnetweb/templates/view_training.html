@@ -1,0 +1,55 @@
+{% extends "layout.html" %} {% block content %}
+
+<div class="trainingStatsPage">
+{{ htmlPage }}
+</div>
+
+<script>
+    var refreshInterval = 300;
+    var stopRefresh = false;
+    var isTrainingDone =  false;
+
+    $(document).ready(function() {
+
+        if(stopRefresh == false) {
+        repeater = setInterval(updateTrainingPage, refreshInterval);
+    }
+    
+        function updateTrainingPage() {
+            updatePageQueryUrl = "/services/UpdateTrainingPage/{{ projectName }}/{{ trainingName }}/json";
+            checkTrainingStatusQueryUrl = "/services/isTrainingDone/{{ projectName }}/{{ trainingName }}";
+
+            if(isTrainingDone == false) {
+                refreshInterval = 15000;
+                clearInterval(repeater);
+                repeater = setInterval(updateTrainingPage, refreshInterval);
+
+                $.ajax({
+                    type: 'GET',
+                    cache: false,
+                    url: checkTrainingStatusQueryUrl, 
+                    success: function(resp){
+                        if(resp.data == true) {
+                            isTrainingDone = true;
+                        }
+
+                        $.ajax({
+                            type: 'GET',
+                            cache: false,
+                            url: updatePageQueryUrl, 
+                            success: function(resp){
+                                $('.trainingStatsPage').empty();
+                                $('.trainingStatsPage').html(resp.data);
+                            }
+                        });  
+                    }
+                });
+            } else {
+                clearInterval(repeater);
+                stopRefresh = true;
+            }
+        }
+    }); 
+</script>
+
+{% endblock %}
