@@ -211,9 +211,10 @@ def getTrainingInfoData(projectName, trainingName):
 	# Get info about this web training project
 	trainingInfoData['webTrainingProjectDetails'] = getWEBProjectTrainingDetails(projectName, trainingName)
 
-	# Get info about training configuration
+	# Get info about training configuration and network configuration
 	if trainingInfoData['webTrainingProjectDetails']['available'] == True:
 		trainingInfoData['trainingConfigurationData'] = getTrainingConfigurationData(projectName, trainingInfoData['webTrainingProjectDetails']['training_file'])
+		trainingInfoData['networkConfigurationData'] = getNetworkConfigurationData(projectName, trainingInfoData['webTrainingProjectDetails']['network_file'])
 
 	# Get training stats
 	trainingInfoData['trainingStats'] = getTrainingStats(projectName, trainingName)
@@ -255,6 +256,18 @@ def isTrainingDone(projectName, trainingName):
 			else:
 				return False
 	return False
+
+
+def getNetworkConfigurationData(projectName, networkConfigFileName):
+	networkConfigurationData = {}
+	networkConfigurationFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFileName)
+
+	if fileExists(networkConfigurationFilePath) == True:
+		with open(networkConfigurationFilePath) as jsonData:
+			d = json.load(jsonData)
+			networkConfigurationData['available'] = True
+
+	return networkConfigurationData
 
 
 def getTrainingConfigurationData(projectName, trainingConfigFileName):
