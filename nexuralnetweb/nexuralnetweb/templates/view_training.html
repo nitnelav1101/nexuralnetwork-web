@@ -5,20 +5,34 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        var isTrainingDone =  false;
+    var refreshInterval = 300;
+    var stopRefresh = false;
+    var isTrainingDone =  false;
 
+    $(document).ready(function() {
+
+        if(stopRefresh == false) {
+        repeater = setInterval(updateTrainingPage, refreshInterval);
+    }
+    
         function updateTrainingPage() {
             updatePageQueryUrl = "/services/UpdateTrainingPage/{{ projectName }}/{{ trainingName }}/json";
             checkTrainingStatusQueryUrl = "/services/isTrainingDone/{{ projectName }}/{{ trainingName }}";
 
-            $.ajax({
-                type: 'GET',
-                cache: false,
-                url: checkTrainingStatusQueryUrl, 
-                success: function(resp){
-                    // alert(resp.data);
-                    if(resp.data == false) {
+            if(isTrainingDone == false) {
+                refreshInterval = 15000;
+                clearInterval(repeater);
+                repeater = setInterval(updateTrainingPage, refreshInterval);
+
+                $.ajax({
+                    type: 'GET',
+                    cache: false,
+                    url: checkTrainingStatusQueryUrl, 
+                    success: function(resp){
+                        if(resp.data == true) {
+                            isTrainingDone = true;
+                        }
+
                         $.ajax({
                             type: 'GET',
                             cache: false,
@@ -26,15 +40,15 @@
                             success: function(resp){
                                 $('.trainingStatsPage').empty();
                                 $('.trainingStatsPage').html(resp.data);
-                                // alert("adas");
                             }
-                        });
+                        });  
                     }
-                }
-            });
+                });
+            } else {
+                clearInterval(repeater);
+                stopRefresh = true;
+            }
         }
-
-        setInterval(updateTrainingPage, 3000);
     }); 
 </script>
 

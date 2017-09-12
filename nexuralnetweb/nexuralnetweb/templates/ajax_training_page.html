@@ -32,13 +32,13 @@
         <div class="col-md-4">
 
             <div class="well">
-                <b><i class="fa fa-area-chart" aria-hidden="true"></i> Creat la:</b> {{ trainingInfoData['webTrainingProjectDetails']['timestamp'] }}
+                <b><i class="fa fa-clock-o" aria-hidden="true"></i> Creat la:</b> {{ trainingInfoData['webTrainingProjectDetails']['timestamp'] }}
                 <br>
                 <b><i class="fa fa-area-chart" aria-hidden="true"></i> Status:</b> {{ trainingInfoData['trainingStats']['training_status'] }}
                 <br>
                 <b><i class="fa fa-tag" aria-hidden="true"></i> Tip problemă rezolvată:</b> {{ trainingInfoData['trainingStats']['result_type'] }}
                 <br>
-                <b><i class="fa fa-clock-o" aria-hidden="true"></i> Număr de epoci:</b> {{ trainingInfoData['trainingStats']['epochs_num'] }}
+                <b><i class="fa fa-exchange" aria-hidden="true"></i> Număr de epoci:</b> {{ trainingInfoData['trainingStats']['epochs_num'] }}
                 <br>
                 <b><i class="fa fa-power-off" aria-hidden="true"></i> Oprire antrenament:</b> {{ trainingInfoData['trainingStats']['stop_condition'] }}
                 <br>
@@ -63,29 +63,35 @@
     
         </div>
         <div class="col-md-8">
+            {% if trainingInfoData['trainingStats']['is_training_done'] == True %}
             <div class="btn-group pull-right">
             {% if isProjectOwner == True %}
             <button type="button" class="btn btn-info" data-toggle="modal" data-target="#formAddNetworkTestModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă test</button>
             {% endif %}
             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#formViewNetworkTestsModal"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează testele existente</button>
             </div>
+            {% endif %}
             <div style="clear:both"></div><br>
 
             <!-- tabs right -->
             <div class="tabbable tabs-right">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a href="#1" data-toggle="tab">Evoluția ratei de învățare</a></li>
-                    <li><a href="#2" data-toggle="tab">Grafic eroare medie</a></li>
+                    <li class="active"><a href="#1" data-toggle="tab">Graficul erorilor</a></li>
+                    <li><a href="#2" data-toggle="tab">Evoluția ratei de învățare</a></li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="1">
                     {% if trainingInfoData['trainingStats']['available'] == True %}
-                        <img src="data:image/png;base64, {{ trainingInfoData['trainingStats']['plot_learning_rate'] }}" class="img-responsive"> 
+                        <img src="data:image/png;base64, {{ trainingInfoData['trainingStats']['plot_epoch_mean_error'] }}" class="img-responsive"> 
+                    {% else %}
+                        <b><span class="text-success"><div class="fa fa-spinner fa-spin loading_icon"></div> &nbsp; Informatii în curs de actualizare...</span></b>
                     {% endif %}
                     </div>
                     <div class="tab-pane" id="2">
                     {% if trainingInfoData['trainingStats']['available'] == True %}
-                        <img src="data:image/png;base64, {{ trainingInfoData['trainingStats']['plot_epoch_mean_error'] }}" class="img-responsive"> 
+                        <img src="data:image/png;base64, {{ trainingInfoData['trainingStats']['plot_learning_rate'] }}" class="img-responsive">
+                    {% else %}
+                        <b><span class="text-success"><div class="fa fa-spinner fa-spin loading_icon"></div> &nbsp; Informatii în curs de actualizare...</span></b>
                     {% endif %}
                     </div>
                 </div>
@@ -102,7 +108,7 @@
             <span class="text-warning"> Afișează statistici pentru epoca
                 <select class="selectEpochNumTrainingStats">
                     {% for i in range(1, trainingInfoData['trainingStats']['epochs_num']|int + 1) %}
-                        <option value="{{ i }}">{{ i }}</option>
+                        <option {% if isProjectOwner == True %} selected {% endif %} value="{{ i }}">{{ i }}</option>
                     {% endfor %}
                 </select> 
                 <b>și clasa</b>
@@ -129,6 +135,8 @@
                     <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingInfoData['trainingStats']['trainingDatasetStats'][0]['f1score'] }}
                     <br>
                 </div>
+                {% else %}
+                    <b><span class="text-success"><div class="fa fa-spinner fa-spin loading_icon"></div> &nbsp; Informatii în curs de actualizare...</span></b>
                 {% endif %}
             </div>
             <div class="col-md-5">
@@ -142,6 +150,8 @@
                     <b><i class="fa fa-angle-double-right" aria-hidden="true"></i> F1 score:</b> {{ trainingInfoData['trainingStats']['validationDatasetStats'][0]['f1score'] }}
                     <br>
                 </div>
+                {% else %}
+                    <b><span class="text-success"><div class="fa fa-spinner fa-spin loading_icon"></div> &nbsp; Informatii în curs de actualizare...</span></b>
                 {% endif %}
             </div>
         </div>

@@ -296,15 +296,20 @@ def getTrainingStats(projectName, trainingName, epochNum = -1, classNum = -1):
 		with open(trainerInfoFilePath, 'r') as dataFile:
 			data = json.load(dataFile)
 			trainingStats['available'] = True
-			trainingStats['result_type'] = data['result_type']
+			trainingStats['result_type'] = getResultTypeMessage(data['result_type'])
 			if 'stop_condition' in data:
-				trainingStats['stop_condition'] = data['stop_condition']
+				trainingStats['stop_condition'] = getStopConditionTypeMessage(data['stop_condition'])
 				trainingStats['training_status'] = "antrenament complet"
+				trainingStats['is_training_done'] = True
 			else:
 				trainingStats['stop_condition'] = "momentan indisponibil"
 				trainingStats['training_status'] = "in curs de antrenare"
+				trainingStats['is_training_done'] = False
 
 			trainingStats['epochs_num'], trainingStats['clases_num'], trainingStats['trainingDatasetStats'], trainingStats['validationDatasetStats'] = getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum)
+
+			if int(trainingStats['epochs_num']) < 5:
+				trainingStats['available'] = False
 
 			learningRateData = []
 			trainingDatasetMeanErrorData = []
@@ -325,6 +330,12 @@ def getTrainingStats(projectName, trainingName, epochNum = -1, classNum = -1):
 			trainingStats['plot_epoch_mean_error'] = getPlotFromData(epochMeanErrorStats, 'Epoca', 'Eroarea medie', ["setul de antrenament", "setul de validare"])
 	else:
 		trainingStats['available'] = False
+		trainingStats['is_training_done'] = False
+		trainingStats['result_type'] = "in curs de actualizare"
+		trainingStats['stop_condition'] = "in curs de actualizare"
+		trainingStats['training_status'] = "in curs de antrenare"
+		trainingStats['epochs_num'] = 0
+		trainingStats['clases_num'] = 0
 
 	return trainingStats
 
@@ -377,3 +388,23 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 		validationDatasetStats.append(stats)
 
 	return totalEpochsNum, totalClassesNum, trainingDatasetStats, validationDatasetStats
+
+
+
+def getResultTypeMessage(resultType):
+	if resultType == "classification":
+		return "clasificare"
+	elif resultType == "multiclass_classification":
+		return "clasificare cu clase multiple"
+	else:
+		return "regresie"
+
+
+
+def getStopConditionTypeMessage(stopConditionType):
+	if stopConditionType == "reached_max_epochs_number":
+		return "s-a atins numarul maxim de epoci"
+	elif stopConditionType == "reached_min_validation_threshold":
+		return "s-a atins eroarea minima pentrul setul de validare"
+	elif stopConditionType == "reached_min_learning_rate_threshold":
+		return "s-a atins valoarea minima a ratei de invatare"
