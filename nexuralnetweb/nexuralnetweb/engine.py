@@ -83,6 +83,15 @@ def getAllTrainings(projectName):
 
 
 
+def getAllTrainingInfoFiles(projectName):
+	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
+	dic = []
+	for x in dirs:
+		dic.append(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], x, "info.json"))
+	return dic
+
+
+
 def getAllNetworkArhitecturesFiles(projectName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])) if fnmatch.fnmatch(f, '*.json')]
 	dic = MultiDict()
@@ -430,3 +439,24 @@ def getStopConditionTypeMessage(stopConditionType):
 		return "s-a atins eroarea minima pentrul setul de validare"
 	elif stopConditionType == "reached_min_learning_rate_threshold":
 		return "s-a atins valoarea minima a ratei de invatare"
+
+
+
+def isSafeToDeleteThis(projectName, fileName, deletionType):
+	searchMember = "none"
+	if deletionType == "network_config":
+		searchMember = "network_file"
+	elif deletionType == "training_config":
+		searchMember = "training_file"
+	elif deletionType == "dataset":
+		searchMember = "dataset"
+
+	infoTrainingFiles = getAllTrainingInfoFiles(projectName)
+
+	for i in range(0, len(infoTrainingFiles)):
+		if fileExists(infoTrainingFiles[i]) == True:
+			with open(infoTrainingFiles[i], 'r') as dataFile:
+				data = json.load(dataFile)
+				if fileName == data[searchMember]:
+					return False
+	return True
