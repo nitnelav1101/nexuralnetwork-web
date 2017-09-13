@@ -264,8 +264,17 @@ def getNetworkConfigurationData(projectName, networkConfigFileName):
 
 	if fileExists(networkConfigurationFilePath) == True:
 		with open(networkConfigurationFilePath) as jsonData:
-			d = json.load(jsonData)
+			data = json.load(jsonData)
 			networkConfigurationData['available'] = True
+			networkConfigurationData['layers'] = {}
+			for i in range(0, len(data['network_layers'])):
+				networkConfigurationData['layers'][i] = {}
+				networkConfigurationData['layers'][i]['type'] = data['network_layers'][i]['type']
+				networkConfigurationData['layers'][i]['params'] = {}
+				for key, value in data['network_layers'][i]['params'].items():
+					networkConfigurationData['layers'][i]['params'][key] = value
+	else:
+		networkConfigurationData['available'] = False
 
 	return networkConfigurationData
 
@@ -276,16 +285,16 @@ def getTrainingConfigurationData(projectName, trainingConfigFileName):
 
 	if fileExists(trainingConfigurationFilePath) == True:
 		with open(trainingConfigurationFilePath) as jsonData:
-			d = json.load(jsonData)
+			data = json.load(jsonData)
 			trainingConfigurationData['available'] = True
-			trainingConfigurationData['max_num_epochs'] = d['trainer_settings']['max_num_epochs']
-			trainingConfigurationData['autosave_training_num_epochs'] = d['trainer_settings']['autosave_training_num_epochs']
-			trainingConfigurationData['min_learning_rate_threshold'] = d['trainer_settings']['min_learning_rate_threshold']
-			trainingConfigurationData['min_validation_error_threshold'] = d['trainer_settings']['min_validation_error_threshold']
-			trainingConfigurationData['training_dataset_percentage'] = d['trainer_settings']['training_dataset_percentage']
-			trainingConfigurationData['algorithm'] = d['solver']['algorithm']
-			trainingConfigurationData['learning_rate'] = d['solver']['learning_rate']
-			trainingConfigurationData['weight_decay'] = d['solver']['weight_decay']
+			trainingConfigurationData['max_num_epochs'] = data['trainer_settings']['max_num_epochs']
+			trainingConfigurationData['autosave_training_num_epochs'] = data['trainer_settings']['autosave_training_num_epochs']
+			trainingConfigurationData['min_learning_rate_threshold'] = data['trainer_settings']['min_learning_rate_threshold']
+			trainingConfigurationData['min_validation_error_threshold'] = data['trainer_settings']['min_validation_error_threshold']
+			trainingConfigurationData['training_dataset_percentage'] = data['trainer_settings']['training_dataset_percentage']
+			trainingConfigurationData['algorithm'] = data['solver']['algorithm']
+			trainingConfigurationData['learning_rate'] = data['solver']['learning_rate']
+			trainingConfigurationData['weight_decay'] = data['solver']['weight_decay']
 	else:
 		trainingConfigurationData['available'] = False
 		trainingConfigurationData['max_num_epochs'] = "-in curs de actualizare"

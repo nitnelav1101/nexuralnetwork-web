@@ -61,6 +61,22 @@ def UpdateTrainingPage(projectName, trainingName, returnType):
         return jsonify({'data': render_template('ajax_training_page.html', projectName = projectName, trainingName = trainingName, 
         isProjectOwner = isProjectOwner, formAddNetworkTest = formAddNetworkTest, trainingInfoData = trainingInfoData, availableTests = availableTests)})
 
+# ---------------------------
+
+@app.route('/services/displayNetworkConfig/<string:projectName>/<string:networkConfigName>', methods=['GET'])
+def displayNetworkConfig(projectName, networkConfigName):
+    print "blaaa: " + networkConfigName
+    result = {}
+    result['networkConfigurationData'] = engine.getNetworkConfigurationData(projectName, networkConfigName)
+    return jsonify({'data': render_template('ajax_display_network_config.html', result = result)})
+
+# ---------------------------
+
+@app.route('/services/displayTrainingConfig/<string:projectName>/<string:trainingConfigName>', methods=['GET'])
+def displayTrainingConfig(projectName, trainingConfigName):
+    result = {}
+    result['trainingConfigurationData'] = engine.getTrainingConfigurationData(projectName, trainingConfigName)
+    return jsonify({'data': render_template('ajax_display_training_config.html', result = result)})
 
 
 # -------------------------------------------------------------------------------------

@@ -246,7 +246,7 @@
 {% endif %}
 
 
-<!-- Modal add test -->
+<!-- Modal test list -->
     <div class="modal fade" id="formViewNetworkTestsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -311,7 +311,6 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-                        
                     </div>
               
             </div>
@@ -321,7 +320,7 @@
 
 <!-- Modal network config data -->
     <div class="modal fade" id="viewNetworkConfigDataModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-dialog-big" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -329,7 +328,18 @@
                 </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-12">asdasd</div>
+                        {% if trainingInfoData['networkConfigurationData']['available'] == True %}
+                            <div style="padding-left: 50px;" class="col-md-12">
+                                {% for i in range(trainingInfoData['networkConfigurationData']['layers']|length) %}
+                                    <span style="font-size: 20px;"><i class="fa fa-caret-right" aria-hidden="true"></i> {{ trainingInfoData['networkConfigurationData']['layers'][i]['type'] }}</span> <br>
+                                    {% for key, value in trainingInfoData['networkConfigurationData']['layers'][i]['params'].items() %}
+                                        <span style="padding-left: 25px;"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ key }} <i class="fa fa-long-arrow-right" aria-hidden="true"></i> {{ value }} </span><br>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                                - momentan indisponibil
+                            {% endif %}
                         </div>
                         <div style="clear:both"></div>
                     </div>

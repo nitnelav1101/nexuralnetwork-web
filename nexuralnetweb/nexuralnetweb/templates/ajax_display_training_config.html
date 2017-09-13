@@ -1,0 +1,14 @@
+<div style="padding-left: 50px;" class="col-md-12">
+{% if result['trainingConfigurationData']['available'] == True %}
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Număr maxim de epoci:</b> {{ result['trainingConfigurationData']['max_num_epochs'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Epoci parcurse pentru salvare automată: </b> {{ result['trainingConfigurationData']['autosave_training_num_epochs'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a ratei de învățare:</b> {{ result['trainingConfigurationData']['min_learning_rate_threshold'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Limita minimă a erorii de validare:</b> {{ result['trainingConfigurationData']['min_validation_error_threshold'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Procent dimensiune set de antrenament</b> {{ result['trainingConfigurationData']['training_dataset_percentage'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Algoritm actualizare ponderi:</b> {{ result['trainingConfigurationData']['algorithm'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Rata de învățare de pornire:</b> {{ result['trainingConfigurationData']['learning_rate'] }} <br>
+    <b><i class="fa fa-caret-right" aria-hidden="true"></i> Valoare de penalizare a ponderilor:</b> {{ result['trainingConfigurationData']['weight_decay'] }}<br>
+{% else %}
+    - momentan indisponibil
+{% endif %}
+</div>

@@ -112,6 +112,7 @@
                     <tr>
                         <td> {{ key }}</td>
                         <td class="text-right"> 
+                            <button name="buttonViewNetworkConfigInfo" value="/services/displayNetworkConfig/{{ projectName }}/{{ key }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</button>
                             <a href="{{ url_for('downloadConfigFile', projectName = projectName, configType = 'netConfig', fileName = key) }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
                             {% if isProjectOwner == True %}
                             <a href="{{ url_for('deleteConfigFile', projectName = projectName, networkConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
@@ -140,6 +141,7 @@
                 <tr>
                     <td> {{ key }}</td>
                     <td class="text-right"> 
+                        <button name="buttonViewTrainingConfigInfo" value="/services/displayTrainingConfig/{{ projectName }}/{{ key }}" class="btn btn-success"><i class="fa fa-eye" aria-hidden="true"></i> Vizualizează</button>
                         <a href="{{ url_for('downloadConfigFile', projectName = projectName, configType = 'trainConfig', fileName = key) }}" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Descarcă</a>
                         {% if isProjectOwner == True %}
                         <a href="{{ url_for('deleteTrainingFile', projectName = projectName, trainingConfigFile = key) }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge</a>
@@ -323,6 +325,90 @@
 </div>
 </div>
 </div>
+
+
+<!-- Modal view network config info -->
+    <div class="modal fade" id="displayNetworkConfigInfos" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Structura retelei neurale</h4>
+                </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div id="viewNetworkConfigContent"></div>
+                        </div>
+                        <div style="clear:both"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+                    </div>
+              
+            </div>
+        </div>
+    </div>
+
+
+<!-- Modal view network config info -->
+    <div class="modal fade" id="displayTrainingConfigInfos" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Optiuni antrenament</h4>
+                </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div id="viewTrainingConfigContent"></div>
+                        </div>
+                        <div style="clear:both"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+                    </div>
+              
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+    $(document).ready(function() {
+        $("button[name^=buttonViewNetworkConfigInfo]").click(function(e) {
+        e.preventDefault();
+        queryUrl = $(this).attr("value");
+            $.ajax({
+                type: 'GET',
+                cache: false,
+                url: queryUrl, 
+                success: function(resp){
+                    $("#viewNetworkConfigContent").empty();
+                    $('#viewNetworkConfigContent').html(resp.data);
+                    $('#displayNetworkConfigInfos').modal('toggle');
+                }
+            });
+        });
+    }); 
+
+    $(document).ready(function() {
+        $("button[name^=buttonViewTrainingConfigInfo]").click(function(e) {
+        e.preventDefault();
+        queryUrl = $(this).attr("value");
+            $.ajax({
+                type: 'GET',
+                cache: false,
+                url: queryUrl, 
+                success: function(resp){
+                    $("#viewTrainingConfigContent").empty();
+                    $('#viewTrainingConfigContent').html(resp.data);
+                    $('#displayTrainingConfigInfos').modal('toggle');
+                }
+            });
+        });
+    }); 
+</script>
 
 {% endif %}
 
