@@ -61,6 +61,22 @@ def UpdateTrainingPage(projectName, trainingName, returnType):
         return jsonify({'data': render_template('ajax_training_page.html', projectName = projectName, trainingName = trainingName, 
         isProjectOwner = isProjectOwner, formAddNetworkTest = formAddNetworkTest, trainingInfoData = trainingInfoData, availableTests = availableTests)})
 
+# ---------------------------
+
+@app.route('/services/displayNetworkConfig/<string:projectName>/<string:networkConfigName>', methods=['GET'])
+def displayNetworkConfig(projectName, networkConfigName):
+    print "blaaa: " + networkConfigName
+    result = {}
+    result['networkConfigurationData'] = engine.getNetworkConfigurationData(projectName, networkConfigName)
+    return jsonify({'data': render_template('ajax_display_network_config.html', result = result)})
+
+# ---------------------------
+
+@app.route('/services/displayTrainingConfig/<string:projectName>/<string:trainingConfigName>', methods=['GET'])
+def displayTrainingConfig(projectName, trainingConfigName):
+    result = {}
+    result['trainingConfigurationData'] = engine.getTrainingConfigurationData(projectName, trainingConfigName)
+    return jsonify({'data': render_template('ajax_display_training_config.html', result = result)})
 
 
 # -------------------------------------------------------------------------------------
@@ -191,6 +207,10 @@ def deleteConfigFile(projectName, networkConfigFile):
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
         return redirect(redirectUrl)
 
+    if engine.isSafeToDeleteThis(projectName, networkConfigFile, "network_config") == False:
+        flash('Fisierul este utilizat intr-unul sau mai multe antrenamente. Pentru a-l sterge, va rugam sa stergeti prma data antrenamentele ce il utilizeaza!', 'warning')
+        return redirect(redirectUrl)
+
     path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFile)
     if engine.fileExists(path) == True:
         os.remove(path)
@@ -238,6 +258,10 @@ def deleteTrainingFile(projectName, trainingConfigFile):
 
     if engine.isProjectOwner(projectName) == False:
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    if engine.isSafeToDeleteThis(projectName, trainingConfigFile, "training_config") == False:
+        flash('Fisierul este utilizat intr-unul sau mai multe antrenamente. Pentru a-l sterge, va rugam sa stergeti prma data antrenamentele ce il utilizeaza!', 'warning')
         return redirect(redirectUrl)
 
     path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFile)
@@ -345,6 +369,10 @@ def deleteDataset(projectName, datasetName):
 
     if engine.isProjectOwner(projectName) == False:
         flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    if engine.isSafeToDeleteThis(projectName, datasetName, "dataset") == False:
+        flash('Setul mde date este utilizat intr-unul sau mai multe antrenamente. Pentru a-l sterge, va rugam sa stergeti prma data antrenamentele ce il utilizeaza!', 'warning')
         return redirect(redirectUrl)
 
     path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['PROJECT_DATASETS_FOLDER_NAME'], datasetName)

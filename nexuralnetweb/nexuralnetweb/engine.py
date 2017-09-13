@@ -83,6 +83,15 @@ def getAllTrainings(projectName):
 
 
 
+def getAllTrainingInfoFiles(projectName):
+	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
+	dic = []
+	for x in dirs:
+		dic.append(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], x, "info.json"))
+	return dic
+
+
+
 def getAllNetworkArhitecturesFiles(projectName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])) if fnmatch.fnmatch(f, '*.json')]
 	dic = MultiDict()
@@ -211,9 +220,10 @@ def getTrainingInfoData(projectName, trainingName):
 	# Get info about this web training project
 	trainingInfoData['webTrainingProjectDetails'] = getWEBProjectTrainingDetails(projectName, trainingName)
 
-	# Get info about training configuration
+	# Get info about training configuration and network configuration
 	if trainingInfoData['webTrainingProjectDetails']['available'] == True:
 		trainingInfoData['trainingConfigurationData'] = getTrainingConfigurationData(projectName, trainingInfoData['webTrainingProjectDetails']['training_file'])
+		trainingInfoData['networkConfigurationData'] = getNetworkConfigurationData(projectName, trainingInfoData['webTrainingProjectDetails']['network_file'])
 
 	# Get training stats
 	trainingInfoData['trainingStats'] = getTrainingStats(projectName, trainingName)
@@ -257,22 +267,43 @@ def isTrainingDone(projectName, trainingName):
 	return False
 
 
+def getNetworkConfigurationData(projectName, networkConfigFileName):
+	networkConfigurationData = {}
+	networkConfigurationFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'], networkConfigFileName)
+
+	if fileExists(networkConfigurationFilePath) == True:
+		with open(networkConfigurationFilePath) as jsonData:
+			data = json.load(jsonData)
+			networkConfigurationData['available'] = True
+			networkConfigurationData['layers'] = {}
+			for i in range(0, len(data['network_layers'])):
+				networkConfigurationData['layers'][i] = {}
+				networkConfigurationData['layers'][i]['type'] = data['network_layers'][i]['type']
+				networkConfigurationData['layers'][i]['params'] = {}
+				for key, value in data['network_layers'][i]['params'].items():
+					networkConfigurationData['layers'][i]['params'][key] = value
+	else:
+		networkConfigurationData['available'] = False
+
+	return networkConfigurationData
+
+
 def getTrainingConfigurationData(projectName, trainingConfigFileName):
 	trainingConfigurationData = {}
 	trainingConfigurationFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'], trainingConfigFileName)
 
 	if fileExists(trainingConfigurationFilePath) == True:
 		with open(trainingConfigurationFilePath) as jsonData:
-			d = json.load(jsonData)
+			data = json.load(jsonData)
 			trainingConfigurationData['available'] = True
-			trainingConfigurationData['max_num_epochs'] = d['trainer_settings']['max_num_epochs']
-			trainingConfigurationData['autosave_training_num_epochs'] = d['trainer_settings']['autosave_training_num_epochs']
-			trainingConfigurationData['min_learning_rate_threshold'] = d['trainer_settings']['min_learning_rate_threshold']
-			trainingConfigurationData['min_validation_error_threshold'] = d['trainer_settings']['min_validation_error_threshold']
-			trainingConfigurationData['training_dataset_percentage'] = d['trainer_settings']['training_dataset_percentage']
-			trainingConfigurationData['algorithm'] = d['solver']['algorithm']
-			trainingConfigurationData['learning_rate'] = d['solver']['learning_rate']
-			trainingConfigurationData['weight_decay'] = d['solver']['weight_decay']
+			trainingConfigurationData['max_num_epochs'] = data['trainer_settings']['max_num_epochs']
+			trainingConfigurationData['autosave_training_num_epochs'] = data['trainer_settings']['autosave_training_num_epochs']
+			trainingConfigurationData['min_learning_rate_threshold'] = data['trainer_settings']['min_learning_rate_threshold']
+			trainingConfigurationData['min_validation_error_threshold'] = data['trainer_settings']['min_validation_error_threshold']
+			trainingConfigurationData['training_dataset_percentage'] = data['trainer_settings']['training_dataset_percentage']
+			trainingConfigurationData['algorithm'] = data['solver']['algorithm']
+			trainingConfigurationData['learning_rate'] = data['solver']['learning_rate']
+			trainingConfigurationData['weight_decay'] = data['solver']['weight_decay']
 	else:
 		trainingConfigurationData['available'] = False
 		trainingConfigurationData['max_num_epochs'] = "-in curs de actualizare"
@@ -408,3 +439,24 @@ def getStopConditionTypeMessage(stopConditionType):
 		return "s-a atins eroarea minima pentrul setul de validare"
 	elif stopConditionType == "reached_min_learning_rate_threshold":
 		return "s-a atins valoarea minima a ratei de invatare"
+
+
+
+def isSafeToDeleteThis(projectName, fileName, deletionType):
+	searchMember = "none"
+	if deletionType == "network_config":
+		searchMember = "network_file"
+	elif deletionType == "training_config":
+		searchMember = "training_file"
+	elif deletionType == "dataset":
+		searchMember = "dataset"
+
+	infoTrainingFiles = getAllTrainingInfoFiles(projectName)
+
+	for i in range(0, len(infoTrainingFiles)):
+		if fileExists(infoTrainingFiles[i]) == True:
+			with open(infoTrainingFiles[i], 'r') as dataFile:
+				data = json.load(dataFile)
+				if fileName == data[searchMember]:
+					return False
+	return True
