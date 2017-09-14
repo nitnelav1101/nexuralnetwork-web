@@ -1,4 +1,4 @@
-from wtforms import TextField, SubmitField, SelectField, PasswordField, validators, ValidationError
+from wtforms import TextField, SubmitField, SelectField, PasswordField, validators, ValidationError, RadioField, HiddenField
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
@@ -42,6 +42,9 @@ class AddNetworkTrainingForm(FlaskForm):
 	networkArhitecture = SelectField('Arhitectura retelei:', [validators.Required(message='Va rugam sa selectati o arhitectura din cele disponibile, sau daca nu exista, va rugam sa adaugati una.')], choices = [])
 	trainingFile = SelectField('Fisier de antrenament:', [validators.Required(message='Va rugam sa selectati un fisier de antrenament din cele disponibile, sau daca nu exista, va rugam sa adaugati unul.')], choices = [])
 	trainingDataSet = SelectField('Set de date:', [validators.Required(message='Va rugam sa selectati un set de date, sau daca nu exista, va rugam sa adaugati unul nou din sectiunea corespunzatoare.')], choices = [])
+	continueExistingTraining = RadioField('Continua un antrenament existent', choices=[('yes','Da'),('no','Nu')], default='no', validators=(validators.Optional(),))
+	existingTrainingNameHidden = HiddenField('Antrenament existent:', default= "none", validators=(validators.Optional(),))
+	existingTrainingEpochHidden = HiddenField('Epoca de start:', default= "none", validators=(validators.Optional(),))
 	submit = SubmitField("Porneste antrenamentul")
 
 	def setChoices(self, availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets):

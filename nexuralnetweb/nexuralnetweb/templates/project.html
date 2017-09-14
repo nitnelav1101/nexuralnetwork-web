@@ -314,6 +314,28 @@
             {{ formAddNetworkTraining.trainingDataSet.label }} <br>
             {{ formAddNetworkTraining.trainingDataSet(class_="form-control") }} <br>
         </div>
+
+        {% if hasProjectTrainings == True %}
+            <div style="clear:both"></div><hr>
+
+            <div class="col-md-6">
+                {{ formAddNetworkTraining.continueExistingTraining.label }} <br>
+                {{ formAddNetworkTraining.continueExistingTraining }} <br>
+            </div>
+
+            <div class="col-md-6">
+                {{ formAddNetworkTraining.existingTrainingNameHidden.label }} <br>
+                <select disabled class="form-control" id="existingTrainingName"></select>
+                {{ formAddNetworkTraining.existingTrainingNameHidden }} <br>
+            </div>
+
+            <div class="col-md-6">
+                {{ formAddNetworkTraining.existingTrainingEpochHidden.label }} <br>
+                <select disabled class="form-control" id="existingTrainingEpoch" name="trainingDataSet"></select>
+                {{ formAddNetworkTraining.existingTrainingEpochHidden }} <br>
+            </div>
+        {% endif %}
+
     </div>
     <div style="clear:both"></div>
 </div>
@@ -390,9 +412,7 @@
                 }
             });
         });
-    }); 
 
-    $(document).ready(function() {
         $("button[name^=buttonViewTrainingConfigInfo]").click(function(e) {
         e.preventDefault();
         queryUrl = $(this).attr("value");
@@ -406,6 +426,66 @@
                     $('#displayTrainingConfigInfos').modal('toggle');
                 }
             });
+        });
+
+
+        $("#continueExistingTraining-0").change(function(){ 
+            if( $(this).is(":checked") ){
+                var val = $(this).val();
+                $("#existingTrainingName").children().remove();
+
+                $.ajax({
+                    type: 'GET',
+                    cache: false,
+                    url: "/services/getProjectTrainingsName/{{ projectName }}", 
+                    success: function(resp){
+                        for(var key in resp.data) {
+                            $("#existingTrainingName").append('<option value=' + resp.data[key] + '>' + resp.data[key] + '</option>');
+                        }
+                        
+                        $('input[name="existingTrainingNameHidden"]').val($('#existingTrainingName').find(":selected").text());
+                        $("#existingTrainingName").prop('disabled', false);
+                    }
+                });
+            }
+        });
+
+
+        $('#existingTrainingName').change(function(){
+            var selectedValue = $(this).find("option:selected").attr('value');
+            $('input[name="existingTrainingNameHidden"]').val(selectedValue);
+
+            $("#existingTrainingEpoch").children().remove();
+
+                $.ajax({
+                    type: 'GET',
+                    cache: false,
+                    url: "/services/getTrainingEpochsName/{{ projectName }}/" + selectedValue, 
+                    success: function(resp){
+                        for(var key in resp.data) {
+                            $("#existingTrainingEpoch").append('<option value=' + resp.data[key] + '>' + resp.data[key] + '</option>');
+                        }
+
+                        $('input[name="existingTrainingEpochHidden"]').val($('#existingTrainingEpoch').find(":selected").text());
+                        $("#existingTrainingEpoch").prop('disabled', false);
+                    }
+                });  
+        });
+
+
+        $('#existingTrainingEpoch').change(function(){
+            var selectedValue = $(this).find("option:selected").attr('value');
+            $('input[name="existingTrainingEpochHidden"]').val(selectedValue);
+        });
+
+
+        $("#continueExistingTraining-1").change(function(){ 
+            if( $(this).is(":checked") ){
+                $("#existingTrainingName").children().remove();
+                $("#existingTrainingName").prop('disabled', true);
+                $("#existingTrainingEpoch").children().remove();
+                $("#existingTrainingEpoch").prop('disabled', true);
+            }
         });
     }); 
 </script>
