@@ -314,6 +314,28 @@
             {{ formAddNetworkTraining.trainingDataSet.label }} <br>
             {{ formAddNetworkTraining.trainingDataSet(class_="form-control") }} <br>
         </div>
+
+        {% if hasProjectTrainings == True %}
+            <div style="clear:both"></div><hr>
+
+            <div class="col-md-6">
+                {{ formAddNetworkTraining.continueExistingTraining.label }} <br>
+                {{ formAddNetworkTraining.continueExistingTraining }} <br>
+            </div>
+
+            <div class="col-md-6">
+                {{ formAddNetworkTraining.existingTrainingNameHidden.label }} <br>
+                <select disabled class="form-control" id="existingTrainingName"></select>
+                {{ formAddNetworkTraining.existingTrainingNameHidden }} <br>
+            </div>
+
+            <div class="col-md-6">
+                {{ formAddNetworkTraining.existingTrainingEpochHidden.label }} <br>
+                <select disabled class="form-control" id="existingTrainingEpoch" name="trainingDataSet"></select>
+                {{ formAddNetworkTraining.existingTrainingEpochHidden }} <br>
+            </div>
+        {% endif %}
+
     </div>
     <div style="clear:both"></div>
 </div>
@@ -376,6 +398,8 @@
 
 <script>
     $(document).ready(function() {
+
+        // View network config details
         $("button[name^=buttonViewNetworkConfigInfo]").click(function(e) {
         e.preventDefault();
         queryUrl = $(this).attr("value");
@@ -390,9 +414,8 @@
                 }
             });
         });
-    }); 
 
-    $(document).ready(function() {
+        // View training config details
         $("button[name^=buttonViewTrainingConfigInfo]").click(function(e) {
         e.preventDefault();
         queryUrl = $(this).attr("value");
@@ -406,6 +429,73 @@
                     $('#displayTrainingConfigInfos').modal('toggle');
                 }
             });
+        });
+
+        // Check if user selected to continue an existing training
+        $("#continueExistingTraining-0").change(function(){ 
+            if( $(this).is(":checked") ){
+                var selectedValue = $(this).val();
+
+                // Remove all elements from the existing trainings list
+                $("#existingTrainingName").children().remove();
+
+                $.ajax({
+                    type: 'GET',
+                    cache: false,
+                    url: "/services/getProjectTrainingsName/{{ projectName }}", 
+                    success: function(resp){
+                        for(var key in resp.data) {
+                            $("#existingTrainingName").append('<option value=' + resp.data[key] + '>' + resp.data[key] + '</option>');
+                        }
+                        
+                        // Assign value to the hidden field and enable the interface
+                        $('input[name="existingTrainingNameHidden"]').val($('#existingTrainingName').find(":selected").text());
+                        $("#existingTrainingName").prop('disabled', false);
+                        $('#existingTrainingName').trigger('change');
+                    }
+                });
+            }
+        });
+
+        // Check any change event for the existing trainings select field
+        $('#existingTrainingName').change(function(){
+            // Assign value to the hidden field
+            var selectedValue = $(this).find("option:selected").attr('value');
+            $('input[name="existingTrainingNameHidden"]').val(selectedValue);
+            // Remove all elements from the the epochs list
+            $("#existingTrainingEpoch").children().remove();
+
+                $.ajax({
+                    type: 'GET',
+                    cache: false,
+                    url: "/services/getTrainingEpochsName/{{ projectName }}/" + selectedValue, 
+                    success: function(resp){
+                        for(var key in resp.data) {
+                            $("#existingTrainingEpoch").append('<option value=' + resp.data[key] + '>' + resp.data[key] + '</option>');
+                        }
+
+                        // Assign value to the hidden field and enable the interface
+                        $('input[name="existingTrainingEpochHidden"]').val($('#existingTrainingEpoch').find(":selected").text());
+                        $("#existingTrainingEpoch").prop('disabled', false);
+                    }
+                });  
+        });
+
+        // Check any change event for the existing training epochs select field
+        $('#existingTrainingEpoch').change(function(){
+            // Assign value to the hidden field
+            var selectedValue = $(this).find("option:selected").attr('value');
+            $('input[name="existingTrainingEpochHidden"]').val(selectedValue);
+        });
+
+        // Reset fields when continue training is off
+        $("#continueExistingTraining-1").change(function(){ 
+            if( $(this).is(":checked") ){
+                $("#existingTrainingName").children().remove();
+                $("#existingTrainingName").prop('disabled', true);
+                $("#existingTrainingEpoch").children().remove();
+                $("#existingTrainingEpoch").prop('disabled', true);
+            }
         });
     }); 
 </script>

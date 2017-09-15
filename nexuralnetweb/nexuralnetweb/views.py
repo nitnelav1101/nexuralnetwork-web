@@ -78,6 +78,19 @@ def displayTrainingConfig(projectName, trainingConfigName):
     result['trainingConfigurationData'] = engine.getTrainingConfigurationData(projectName, trainingConfigName)
     return jsonify({'data': render_template('ajax_display_training_config.html', result = result)})
 
+@app.route('/services/getProjectTrainingsName/<string:projectName>', methods=['GET'])
+def getProjectTrainingsName(projectName):
+    result = engine.getProjectTrainingsNames(projectName)
+    return jsonify({'data': result})
+
+# ---------------------------
+
+@app.route('/services/getTrainingEpochsName/<string:projectName>/<string:trainingName>', methods=['GET'])
+def getTrainingEpochsName(projectName, trainingName):
+    result = engine.getTrainingEpochsNames(projectName, trainingName)
+    return jsonify({'data': result})
+
+
 
 # -------------------------------------------------------------------------------------
 #### Home page
@@ -135,9 +148,11 @@ def project(projectName):
 
     formAddNetworkTraining = AddNetworkTrainingForm()
     formAddNetworkTraining.setChoices(availableNetworkArhitectures, availableTrainingFiles, availableTrainingDataSets)
+    
+    hasProjectTrainings = engine.hasProjectTrainings(projectName)
 
-    return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, formAddTrainingFile = formAddTrainingFile, 
-        formAddNetworkFile = formAddNetworkFile, formAddNetworkTraining = formAddNetworkTraining, 
+    return render_template('project.html', title = 'Vizualizare proiect | neXuralNet Project', projectName = projectName, isProjectOwner = isProjectOwner, 
+        formAddTrainingFile = formAddTrainingFile, formAddNetworkFile = formAddNetworkFile, formAddNetworkTraining = formAddNetworkTraining, hasProjectTrainings = hasProjectTrainings,
         availableNetworkArhitectures = availableNetworkArhitectures, availableTrainingFiles = availableTrainingFiles, availableTrainings = availableTrainings)
 
 # ---------------------------
@@ -309,6 +324,7 @@ def manageProjectDatasets(projectName):
 
 # ---------------------------
 
+# TODO: Rewrite this function !!!
 @app.route('/addPredefinedDataSet/<string:projectName>', methods=['POST'])
 def addPredefinedDataSet(projectName):
     redirectUrl = '/manageProjectDatasets/' + projectName
@@ -389,8 +405,9 @@ def deleteDataset(projectName, datasetName):
 
 
 # -------------------------------------------------------------------------------------
-#### Manage project trainings
+#### Manage project trainings 
 # -------------------------------------------------------------------------------------
+# TODO: Rewrite this function !!! A lot of mess here!
 @app.route('/addNetworkTraining/<string:projectName>', methods=['POST'])
 def addNetworkTraining(projectName):
     redirectUrl = '/project/' + projectName
@@ -415,6 +432,7 @@ def addNetworkTraining(projectName):
         else:
             trainingName = engine.cleanAlphanumericString(form.trainingName.data)
             trainingPath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName)
+            continueExistingTraining = form.continueExistingTraining.data == "yes"
 
             if engine.dirExists(trainingPath) == True:
                 flash('Exista deja un antrenament cu acest nume!', 'warning')
@@ -427,6 +445,21 @@ def addNetworkTraining(projectName):
             engine.createDirectory(trainingPath)
             engine.createDirectory(outputTrainerInfoFolderPath)
             engine.createDirectory(os.path.join(trainingPath, "tests"))
+
+            if continueExistingTraining == True:
+                engine.createDirectory(os.path.join(trainingPath, "weightstocontinue/"))
+                # Copy the weights file to this project
+                existingTrainingName = form.existingTrainingNameHidden.data
+                existingTrainingEpoch = form.existingTrainingEpochHidden.data
+                weightsSource = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], existingTrainingName, "info", existingTrainingEpoch)
+                if engine.fileExists(weightsSource):
+                    weightsToContinueFilePath = os.path.join(os.getcwd(), trainingPath, "weightstocontinue", "weights.json")
+                    shutil.copyfile(weightsSource, weightsToContinueFilePath)
+                else:
+                    flash('Nu s-a putut localiza fisierul ponderilor de pornire pentru noul antrenament!', 'warning')
+                    # TODO: Remove created project
+                    return redirect(redirectUrl)
+
 
             datasetName = engine.cleanAlphanumericString(form.trainingDataSet.data)
             networkArhitecture = form.networkArhitecture.data
@@ -475,7 +508,11 @@ def addNetworkTraining(projectName):
             with open(infoDataFile, 'w') as outfile:
                 json.dump(infoData, outfile)
 
-            result = webtasks.trainNetworkTask.delay(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDS, trainingDS)
+
+            if continueExistingTraining == True:
+                result = webtasks.trainNetworkTaskFromOtherTraining.delay(networkArhitecturePath, trainingFilePath, weightsToContinueFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDS, trainingDS)
+            else:
+                result = webtasks.trainNetworkTask.delay(networkArhitecturePath, trainingFilePath, dataPath, labelsPath, outputTrainedDataFilePath, outputTrainerInfoFolderPath, trainingDS, trainingDS)
             flash('Antrenamentul a fost adaugat cu succes!', 'success')
             return redirect(redirectUrl)
 
