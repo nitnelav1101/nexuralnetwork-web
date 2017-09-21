@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<script src="/static/js/jsoneditor.min.js"></script>
+
 <div class="col-xs-12 col-sm-12 col-md-12">
 	<div class="page-header">
         {% if isProjectOwner == True %}
@@ -245,8 +247,10 @@
         <div style="clear:both"></div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
         {{ formAddNetworkFile.submit(id_="button", class_="btn btn-primary") }}
+        sau 
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ceNetworkConfigJsonModal">Genereaza un fisier nou </button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
     </div>
 </form>
 </div>
@@ -274,8 +278,10 @@
         <div style="clear:both"></div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
         {{ formAddTrainingFile.submit(id_="button", class_="btn btn-primary") }}
+        sau 
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ceNetworkTrainingJsonModal">Genereaza un fisier nou </button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
     </div>
 </form>
 </div>
@@ -340,8 +346,9 @@
     <div style="clear:both"></div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+    
     {{ formAddNetworkTraining.submit(id_="button", class_="btn btn-primary") }}
+    <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
 </div>
 </form>
 </div>
@@ -396,8 +403,562 @@
 
 
 
+<!-- Modal edit/create network config json -->
+    <div class="modal fade" id="ceNetworkConfigJsonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-dialog-big" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="network_config_editor_holder"></div>
+                            </div>
+                        </div>
+                        <div style="clear:both"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" name="saveNetworkJsonConfig">Salveaza</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+                    </div>
+              
+            </div>
+        </div>
+    </div>
+
+
+
+<!-- Modal edit/create training config json -->
+    <div class="modal fade" id="ceNetworkTrainingJsonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-dialog-big" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="network_training_editor_holder"></div>
+                            </div>
+                        </div>
+                        <div style="clear:both"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" name="saveTrainingJsonConfig">Salveaza</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
+                    </div>
+              
+            </div>
+        </div>
+    </div>
+
+
+
 <script>
+
+JSONEditor.defaults.languages.ro = {
+  error_notset: "propiedad debe existir"
+};
+
+var networkEditor = new JSONEditor(document.getElementById("network_config_editor_holder"), {
+  schema: {
+    "$schema": "Structura retelei neurale",
+    "additionalProperties": true,
+    "title": "Structura retelei neurale",
+    "type": "object",
+    "properties": {
+        "network_layers": {
+            "title": "Straturi",
+            "type": "array",
+            "format": "tabs",
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_0": {
+                                "type": "string",
+                                "default": "tensor_input",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "num_samples": {
+                                        "type": "string",
+                                        "title": "Num of tensor samples",
+                                        "default": "1",
+                                        "format": "text"
+                                    },
+                                    "k": {
+                                        "type": "string",
+                                        "title": "Num of tensor channels",
+                                        "default": "1",
+                                        "format": "text"
+                                    },
+                                    "nr": {
+                                        "type": "string",
+                                        "title": "Num of tensor rows",
+                                        "default": "1",
+                                        "format": "text"
+                                    },
+                                    "nc": {
+                                        "type": "string",
+                                        "title": "Num of tensor cols",
+                                        "default": "2",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "tensor_input"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_1": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "bgr_image_input",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "input_width": {
+                                        "type": "string",
+                                        "title": "Input image width",
+                                        "default": "3",
+                                        "format": "text"
+                                    },
+                                    "input_height": {
+                                        "type": "string",
+                                        "title": "Input image height",
+                                        "default": "3",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "bgr_image_input"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_2": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "gray_image_input",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "input_width": {
+                                        "type": "string",
+                                        "title": "Input image width",
+                                        "default": "3",
+                                        "format": "text"
+                                    },
+                                    "input_height": {
+                                        "type": "string",
+                                        "title": "Input image height",
+                                        "default": "3",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "gray_image_input"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_3": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "average_pooling",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "kernel_width": {
+                                        "type": "string",
+                                        "title": "Kernel width",
+                                        "default": "2",
+                                        "format": "text"
+                                    },
+                                    "kernel_height": {
+                                        "type": "string",
+                                        "title": "Kernel height",
+                                        "default": "2",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "average_pooling"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_4": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "max_pooling",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "kernel_width": {
+                                        "type": "string",
+                                        "title": "Kernel width",
+                                        "default": "2",
+                                        "format": "text"
+                                    },
+                                    "kernel_height": {
+                                        "type": "string",
+                                        "title": "Kernel height",
+                                        "default": "2",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "max_pooling"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_5": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "convolutional",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "num_of_filters": {
+                                        "type": "string",
+                                        "title": "Num of filters",
+                                        "default": "5",
+                                        "format": "text"
+                                    },
+                                    "kernel_width": {
+                                        "type": "string",
+                                        "title": "Kernel width",
+                                        "default": "3",
+                                        "format": "text"
+                                    },
+                                    "kernel_height": {
+                                        "type": "string",
+                                        "title": "Kernel height",
+                                        "default": "3",
+                                        "format": "text"
+                                    },
+                                    "padding_width": {
+                                        "type": "string",
+                                        "title": "Padding width",
+                                        "default": "0",
+                                        "format": "text"
+                                    },
+                                    "padding_height": {
+                                        "type": "string",
+                                        "title": "Padding height",
+                                        "default": "0",
+                                        "format": "text"
+                                    },
+                                    "stride_width": {
+                                        "type": "string",
+                                        "title": "Stride width",
+                                        "default": "0",
+                                        "format": "text"
+                                    },
+                                    "stride_height": {
+                                        "type": "string",
+                                        "title": "Stride height",
+                                        "default": "0",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "convolutional"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_6": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "relu",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object"
+                            }
+                        },
+                        "title": "relu"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_7": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "leaky_relu",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object"
+                            }
+                        },
+                        "title": "leaky_relu"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_8": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "tanh",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object"
+                            }
+                        },
+                        "title": "tanh"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_9": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "mse",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object"
+                            }
+                        },
+                        "title": "mse"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_10": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "softmax",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object"
+                            }
+                        },
+                        "title": "softmax"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_11": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "fully_connected",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "neurons": {
+                                        "type": "string",
+                                        "title": "Nueorns",
+                                        "default": "10",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "fully_connected"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_12": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "dropout",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "dropout_ratio": {
+                                        "type": "string",
+                                        "title": "Dropout ratio",
+                                        "default": "0.5",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "dropout"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_13": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "selu_dropout",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "dropout_ratio": {
+                                        "type": "string",
+                                        "title": "Dropout ratio",
+                                        "default": "0.5",
+                                        "format": "text"
+                                    },
+                                    "alpha": {
+                                        "type": "string",
+                                        "title": "Alpha",
+                                        "default": "-1.75809934",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "selu_dropout"
+                    },
+
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type_14": {
+                                "type": "string",
+                                "title": "Layer name",
+                                "default": "selu",
+                                "options": {
+                                    "hidden": "true"
+                                }
+                            },
+                            "params": {
+                                "title": "Parametrii stratului",
+                                "type": "object",
+                                "properties": {
+                                    "alpha": {
+                                        "type": "string",
+                                        "title": "Alpha",
+                                        "default": "1.67326324",
+                                        "format": "text"
+                                    },
+                                    "lambda": {
+                                        "type": "string",
+                                        "title": "Lambda",
+                                        "default": "1.050700987",
+                                        "format": "text"
+                                    }
+                                }
+                            }
+                        },
+                        "title": "selu"
+                    }
+                ]
+            }
+        }
+    }
+
+  },
+  theme: 'bootstrap3',
+  no_additional_properties: true,
+  disable_edit_json: true,
+  disable_properties: true,
+  disable_collapse: true,
+  language: "ro"
+});
+
+
     $(document).ready(function() {
+
+        $("button[name^=saveNetworkJsonConfig]").click(function(e) {
+            e.preventDefault();
+            var json = networkEditor.getValue();
+            alert(JSON.stringify(json,null,2));
+        });
+
+
+        $("button[name^=saveTrainingJsonConfig]").click(function(e) {
+            e.preventDefault();
+            var json = TrainingEditor.getValue();
+            alert(JSON.stringify(json,null,2));
+        });
+
 
         // View network config details
         $("button[name^=buttonViewNetworkConfigInfo]").click(function(e) {
