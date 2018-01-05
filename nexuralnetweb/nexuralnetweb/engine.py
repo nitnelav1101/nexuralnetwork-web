@@ -475,3 +475,24 @@ def isSafeToDeleteThis(projectName, fileName, deletionType):
 				if fileName == data[searchMember]:
 					return False
 	return True
+
+
+
+
+def saveNetworkConfigFile(data, projectName, networkConfigName):
+	filename = secure_filename(networkConfigName) + ".json"
+	networkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])
+	fileSave = os.path.join(networkFilesDirectory, filename)
+	if fileExists(fileSave) == True:
+		return "Exista deja un fisier de configurare cu acest nume!"
+
+	for layer in data['network_layers']:
+		for key in layer.keys():
+			if "type_" in key:
+				new_key = key.replace(key,"type")
+				if new_key != key:
+					layer[new_key] = layer[key]
+					del layer[key]
+	with open(fileSave, 'w') as outfile:
+		json.dump(data, outfile)
+	return "Done!"

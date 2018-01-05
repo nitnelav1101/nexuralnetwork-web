@@ -91,6 +91,15 @@ def getTrainingEpochsName(projectName, trainingName):
     return jsonify({'data': result})
 
 
+# ---------------------------
+
+@app.route('/services/SaveNetworkConfigFileFromGUI', methods=["POST"])
+def saveNetworkConfigFileFromGUI():
+    if request.method == "POST":
+        data = json.loads(request.form['json_str'])
+        projectName = request.form['project_name']
+        networkConfigName = request.form['cfg_name']
+        return engine.saveNetworkConfigFile(data, projectName, networkConfigName)
 
 # -------------------------------------------------------------------------------------
 #### Home page
