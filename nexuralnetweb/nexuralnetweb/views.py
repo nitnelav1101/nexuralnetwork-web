@@ -90,8 +90,14 @@ def getTrainingEpochsName(projectName, trainingName):
     result = engine.getTrainingEpochsNames(projectName, trainingName)
     return jsonify({'data': result})
 
-
 # ---------------------------
+
+@app.route('/services/getNetworkConfigByTraining/<string:projectName>/<string:trainingName>', methods=['GET'])
+def getNetworkConfigByTraining(projectName, trainingName):
+    result = engine.getNetworkConfigByTraining(projectName, trainingName)
+    return jsonify({'data': result})
+
+# ---------------------------    
 
 @app.route('/services/SaveNetworkConfigFileFromGUI', methods=["POST"])
 def saveNetworkConfigFileFromGUI():

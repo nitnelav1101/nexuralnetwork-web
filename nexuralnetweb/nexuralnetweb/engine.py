@@ -86,10 +86,19 @@ def getProjectTrainingsNames(projectName):
 	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
 	return dirs
 
+
 def getTrainingEpochsNames(projectName, trainingName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info")) if "weights-epoch_" in f]
 	return files
 
+
+def getNetworkConfigByTraining(projectName, trainingName):
+	infoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info.json")
+	if fileExists(infoFilePath):
+		data = json.load(open(infoFilePath))
+		if 'network_file' in data:
+			return data['network_file']
+	return ""
 
 
 def hasProjectTrainings(projectName):

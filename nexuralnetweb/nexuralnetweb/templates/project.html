@@ -1047,20 +1047,35 @@ var networkEditor = new JSONEditor(document.getElementById("network_config_edito
             // Remove all elements from the the epochs list
             $("#existingTrainingEpoch").children().remove();
 
-                $.ajax({
-                    type: 'GET',
-                    cache: false,
-                    url: "/services/getTrainingEpochsName/{{ projectName }}/" + selectedValue, 
-                    success: function(resp){
-                        for(var key in resp.data) {
-                            $("#existingTrainingEpoch").append('<option value=' + resp.data[key] + '>' + resp.data[key] + '</option>');
-                        }
-
-                        // Assign value to the hidden field and enable the interface
-                        $('input[name="existingTrainingEpochHidden"]').val($('#existingTrainingEpoch').find(":selected").text());
-                        $("#existingTrainingEpoch").prop('disabled', false);
+            // Get training epochs for the selected training and populate the select field
+            $.ajax({
+                type: 'GET',
+                cache: false,
+                url: "/services/getTrainingEpochsName/{{ projectName }}/" + selectedValue, 
+                success: function(resp){
+                    for(var key in resp.data) {
+                        $("#existingTrainingEpoch").append('<option value=' + resp.data[key] + '>' + resp.data[key] + '</option>');
                     }
-                });  
+
+                    // Assign value to the hidden field and enable the interface
+                    $('input[name="existingTrainingEpochHidden"]').val($('#existingTrainingEpoch').find(":selected").text());
+                    $("#existingTrainingEpoch").prop('disabled', false);
+                }
+            });
+
+            // Disable network arhitecture select
+            $("#networkArhitecture").prop('disabled', true);
+            var selectedTraininfToContinue = $("#existingTrainingName").find("option:selected").attr('value');
+
+            // Get the network arhitecture config file for the selected training
+            $.ajax({
+                type: 'GET',
+                cache: false,
+                url: "/services/getNetworkConfigByTraining/{{ projectName }}/" + selectedTraininfToContinue, 
+                success: function(resp){
+                    $("#networkArhitecture").val(resp.data);
+                }
+            });
         });
 
         // Check any change event for the existing training epochs select field
@@ -1077,6 +1092,8 @@ var networkEditor = new JSONEditor(document.getElementById("network_config_edito
                 $("#existingTrainingName").prop('disabled', true);
                 $("#existingTrainingEpoch").children().remove();
                 $("#existingTrainingEpoch").prop('disabled', true);
+                // Enable network arhitecture select
+                $("#networkArhitecture").prop('disabled', false);
             }
         });
     }); 
