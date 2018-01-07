@@ -214,12 +214,12 @@
                             </div>
                             <div class="col-md-6">
                                 {{ formAddNetworkTest.networkArhitecture.label }}
-                                <br> {{ formAddNetworkTest.networkArhitecture(class_="form-control") }}
+                                <br> {{ formAddNetworkTest.networkArhitecture(class_="form-control", readonly=true) }}
                                 <br>
                             </div>
                             <div class="col-md-6">
                                 {{ formAddNetworkTest.trainedFile.label }}
-                                <br> {{ formAddNetworkTest.trainedFile(class_="form-control") }}
+                                <br> {{ formAddNetworkTest.trainedFile(class_="form-control", readonly=true) }}
                                 <br>
                             </div>
                             <div class="col-md-6">
@@ -236,8 +236,8 @@
                         <div style="clear:both"></div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
                         {{ formAddNetworkTest.submit(id_="button", class_="btn btn-primary") }}
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
                     </div>
                 </form>
             </div>
@@ -345,9 +345,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Inchide</button>
-                        
                     </div>
-              
             </div>
         </div>
     </div>

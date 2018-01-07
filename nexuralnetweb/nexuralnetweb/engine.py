@@ -86,10 +86,19 @@ def getProjectTrainingsNames(projectName):
 	dirs = [d for d in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'])) if os.path.isdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], d))]
 	return dirs
 
+
 def getTrainingEpochsNames(projectName, trainingName):
 	files = [f for f in os.listdir(os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info")) if "weights-epoch_" in f]
 	return files
 
+
+def getNetworkConfigByTraining(projectName, trainingName):
+	infoFilePath = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAININGS_FOLDER_NAME'], trainingName, "info.json")
+	if fileExists(infoFilePath):
+		data = json.load(open(infoFilePath))
+		if 'network_file' in data:
+			return data['network_file']
+	return ""
 
 
 def hasProjectTrainings(projectName):
@@ -475,3 +484,38 @@ def isSafeToDeleteThis(projectName, fileName, deletionType):
 				if fileName == data[searchMember]:
 					return False
 	return True
+
+
+
+
+def saveNetworkConfigFile(data, projectName, networkConfigName):
+	filename = secure_filename(networkConfigName) + ".json"
+	networkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['NETWORK_FILES_FOLDER_NAME'])
+	fileSave = os.path.join(networkFilesDirectory, filename)
+	if fileExists(fileSave) == True:
+		return "Exista deja un fisier de configurare cu acest nume!"
+
+	for layer in data['network_layers']:
+		for key in layer.keys():
+			if "type_" in key:
+				new_key = key.replace(key,"type")
+				if new_key != key:
+					layer[new_key] = layer[key]
+					del layer[key]
+	with open(fileSave, 'w') as outfile:
+		json.dump(data, outfile)
+	return "Fisierul a fost creat!"
+
+
+
+
+def saveTrainingNetworkConfigFile(data, projectName, trainingNetworkConfigName):
+	filename = secure_filename(trainingNetworkConfigName) + ".json"
+	trainingNetworkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'])
+	fileSave = os.path.join(trainingNetworkFilesDirectory, filename)
+	if fileExists(fileSave) == True:
+		return "Exista deja un fisier de configurare cu acest nume!"
+
+	with open(fileSave, 'w') as outfile:
+		json.dump(data, outfile)
+	return "Fisierul a fost creat!"

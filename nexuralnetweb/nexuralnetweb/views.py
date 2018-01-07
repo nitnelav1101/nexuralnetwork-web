@@ -90,7 +90,32 @@ def getTrainingEpochsName(projectName, trainingName):
     result = engine.getTrainingEpochsNames(projectName, trainingName)
     return jsonify({'data': result})
 
+# ---------------------------
 
+@app.route('/services/getNetworkConfigByTraining/<string:projectName>/<string:trainingName>', methods=['GET'])
+def getNetworkConfigByTraining(projectName, trainingName):
+    result = engine.getNetworkConfigByTraining(projectName, trainingName)
+    return jsonify({'data': result})
+
+# ---------------------------    
+
+@app.route('/services/SaveNetworkConfigFileFromGUI', methods=["POST"])
+def saveNetworkConfigFileFromGUI():
+    if request.method == "POST":
+        data = json.loads(request.form['json_str'])
+        projectName = request.form['project_name']
+        networkConfigName = request.form['cfg_name']
+        return engine.saveNetworkConfigFile(data, projectName, networkConfigName)
+
+# ---------------------------  
+
+@app.route('/services/SaveTrainingNetworkConfigFileFromGUI', methods=["POST"])
+def saveTrainingNetworkConfigFileFromGUI():
+    if request.method == "POST":
+        data = json.loads(request.form['json_str'])
+        projectName = request.form['project_name']
+        trainingNetworkConfigName = request.form['tr_cfg_name']
+        return engine.saveTrainingNetworkConfigFile(data, projectName, trainingNetworkConfigName)
 
 # -------------------------------------------------------------------------------------
 #### Home page
