@@ -107,6 +107,16 @@ def saveNetworkConfigFileFromGUI():
         networkConfigName = request.form['cfg_name']
         return engine.saveNetworkConfigFile(data, projectName, networkConfigName)
 
+# ---------------------------  
+
+@app.route('/services/SaveTrainingNetworkConfigFileFromGUI', methods=["POST"])
+def saveTrainingNetworkConfigFileFromGUI():
+    if request.method == "POST":
+        data = json.loads(request.form['json_str'])
+        projectName = request.form['project_name']
+        trainingNetworkConfigName = request.form['tr_cfg_name']
+        return engine.saveTrainingNetworkConfigFile(data, projectName, trainingNetworkConfigName)
+
 # -------------------------------------------------------------------------------------
 #### Home page
 # -------------------------------------------------------------------------------------

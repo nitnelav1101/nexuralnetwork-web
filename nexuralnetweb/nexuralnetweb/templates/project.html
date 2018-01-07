@@ -444,6 +444,9 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-12">
+                                <b>Nume fisier de configurare:</b> <input type="text" id="nettrainingcfgname">
+                            </div>
+                            <div class="col-md-12">
                                 <div id="network_training_editor_holder"></div>
                             </div>
                         </div>
@@ -948,8 +951,142 @@ var networkEditor = new JSONEditor(document.getElementById("network_config_edito
 });
 
 
+var trainingEditor = new JSONEditor(document.getElementById("network_training_editor_holder"), {
+  schema: {
+        "$schema": "Setarile procesului de antrenare",
+        "additionalProperties": true,
+        "title": "Setarile procesului de antrenare",
+        "definitions": {},
+        "type": "object",
+        "defaultProperties": [
+            "trainer_settings",
+            "solver"
+        ],
+        "properties": {
+            "trainer_settings": {
+                "type": "object",
+                "id": "/properties/trainer_settings",
+                "defaultProperties": [
+                    "max_num_epochs",
+                    "autosave_training_num_epochs",
+                    "min_learning_rate_threshold",
+                    "min_validation_error_threshold",
+                    "learning_rate_decay",
+                    "training_dataset_percentage",
+                    "batch_size"
+                ],
+                "properties": {
+                    "max_num_epochs": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/max_num_epochs",
+                        "title": "Număr maxim de epoci",
+                        "default": "20",
+                        "format": "text"
+                    },
+                    "autosave_training_num_epochs": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/autosave_training_num_epochs",
+                        "title": "Epoci parcurse pentru salvare automată",
+                        "default": "10",
+                        "format": "text"
+                    },
+                    "min_learning_rate_threshold": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/min_learning_rate_threshold",
+                        "title": "Limita minimă a ratei de învățare",
+                        "default": "0.001",
+                        "format": "text"
+                    },
+                    "min_validation_error_threshold": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/min_validation_error_threshold",
+                        "title": "Limita minimă a erorii de validare",
+                        "default": "0.08",
+                        "format": "text"
+                    },
+                    "learning_rate_decay": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/learning_rate_decay",
+                        "title": "Valoare de penalizare a ratei de învățare",
+                        "default": "0.00004",
+                        "format": "text"
+                    },
+                    "training_dataset_percentage": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/training_dataset_percentage",
+                        "title": "Procent dimensiune set de antrenament",
+                        "default": "80",
+                        "format": "text"
+                    },
+                    "batch_size": {
+                        "type": "string",
+                        "id": "/properties/trainer_settings/properties/batch_size",
+                        "title": "Dimensiunea batch-ului de antrenare",
+                        "default": "1",
+                        "format": "text"
+                    }
+                },
+                "format": "grid"
+            },
+            "solver": {
+                "type": "object",
+                "id": "/properties/solver",
+                "defaultProperties": [
+                    "algorithm",
+                    "learning_rate",
+                    "weight_decay",
+                    "momentum"
+                ],
+                "properties": {
+                    "algorithm": {
+                        "type": "string",
+                        "id": "/properties/solver/properties/algorithm",
+                        "title": "Algoritm actualizare ponderi",
+                        "default": "sgd_momentum",
+                        "format": "text",
+                        "options": {
+                            "hidden": "true"
+                        }
+                    },
+                    "learning_rate": {
+                        "type": "string",
+                        "id": "/properties/solver/properties/learning_rate",
+                        "title": "Rata de învățare de pornire",
+                        "default": "0.003",
+                        "format": "text"
+                    },
+                    "weight_decay": {
+                        "type": "string",
+                        "id": "/properties/solver/properties/weight_decay",
+                        "title": "Valoare de penalizare a ponderilor",
+                        "default": "0.0005",
+                        "format": "text"
+                    },
+                    "momentum": {
+                        "type": "string",
+                        "id": "/properties/solver/properties/momentum",
+                        "title": "Valoare momentum",
+                        "default": "0.9",
+                        "format": "text"
+                    }
+                },
+                "format": "grid"
+            }
+        }
+    
+  },
+  theme: 'bootstrap3',
+  no_additional_properties: true,
+  disable_edit_json: true,
+  disable_properties: true,
+  disable_collapse: true,
+  language: "ro"
+});
+
+
     $(document).ready(function() {
 
+        // Create network config from GUI
         $("button[name^=saveNetworkJsonConfig]").click(function(e) {
             e.preventDefault();
             var netConfigData = networkEditor.getValue();
@@ -965,6 +1102,7 @@ var networkEditor = new JSONEditor(document.getElementById("network_config_edito
                     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                     success: function(result) {
                         alert(result);
+                        location.reload();
                     },
                     error: function (jqXHR, exception) {
                         alert(exception);
@@ -974,10 +1112,29 @@ var networkEditor = new JSONEditor(document.getElementById("network_config_edito
         });
 
 
+        // Create training network config from GUI
         $("button[name^=saveTrainingJsonConfig]").click(function(e) {
             e.preventDefault();
-            var json = TrainingEditor.getValue();
-            alert(JSON.stringify(json,null,2));
+            var trainingNetConfigData = trainingEditor.getValue();
+            var trainingConfigFileName = $("#nettrainingcfgname").val();
+
+            if(!trainingConfigFileName || 0 === trainingConfigFileName.length) {
+                alert("Selectati un nume pentru fisierul de configurare!");
+            } else {
+                $.ajax({
+                    type : "POST",
+                    url : "/services/SaveTrainingNetworkConfigFileFromGUI",
+                    data: {json_str: JSON.stringify(trainingNetConfigData), project_name: "{{projectName}}", tr_cfg_name: trainingConfigFileName},
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    success: function(result) {
+                        alert(result);
+                        location.reload();
+                    },
+                    error: function (jqXHR, exception) {
+                        alert(exception);
+                    }
+                });
+            }
         });
 
 

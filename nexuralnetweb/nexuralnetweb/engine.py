@@ -504,4 +504,18 @@ def saveNetworkConfigFile(data, projectName, networkConfigName):
 					del layer[key]
 	with open(fileSave, 'w') as outfile:
 		json.dump(data, outfile)
-	return "Done!"
+	return "Fisierul a fost creat!"
+
+
+
+
+def saveTrainingNetworkConfigFile(data, projectName, trainingNetworkConfigName):
+	filename = secure_filename(trainingNetworkConfigName) + ".json"
+	trainingNetworkFilesDirectory = os.path.join(app.config['BASE_PROJECTS_FOLDER_NAME'], projectName, app.config['TRAINING_FILES_FOLDER_NAME'])
+	fileSave = os.path.join(trainingNetworkFilesDirectory, filename)
+	if fileExists(fileSave) == True:
+		return "Exista deja un fisier de configurare cu acest nume!"
+
+	with open(fileSave, 'w') as outfile:
+		json.dump(data, outfile)
+	return "Fisierul a fost creat!"
