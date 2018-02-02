@@ -424,8 +424,14 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 		totalClassesNum = trainingConfusionMatrixNP.shape[0]
 
 		trainingPrecision = trainingConfusionMatrixNP[classNum][classNum] / trainingConfusionMatrixNP.sum(axis=0)[classNum]
+		if np.isnan(trainingPrecision):
+			trainingPrecision = 0
 		trainingRecall = trainingConfusionMatrixNP[classNum][classNum] / trainingConfusionMatrixNP[classNum].sum()
+		if np.isnan(trainingRecall):
+			trainingRecall = 0
 		trainingF1score = 2 * ((trainingPrecision * trainingRecall) / (trainingPrecision + trainingRecall))
+		if np.isnan(trainingF1score):
+			trainingF1score = 0
 		statstr = {}
 		statstr['recall'] = str(trainingRecall)
 		statstr['precision'] = str(trainingPrecision)
@@ -433,8 +439,14 @@ def getStatsFromConfusionMatrix(projectName, trainingName, epochNum, classNum):
 		trainingDatasetStats.append(statstr)
 
 		precision = validationConfusionMatrixNP[classNum][classNum] / validationConfusionMatrixNP.sum(axis=0)[classNum]
+		if np.isnan(precision):
+			precision = 0
 		recall = validationConfusionMatrixNP[classNum][classNum] / validationConfusionMatrixNP[classNum].sum()
+		if np.isnan(recall):
+			recall = 0
 		f1score = 2 * ((precision * recall) / (precision + recall))
+		if np.isnan(f1score):
+			f1score = 0
 		stats = {}
 		stats['class'] = str(classNum)
 		stats['recall'] = str(recall)

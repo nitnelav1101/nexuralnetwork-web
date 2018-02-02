@@ -182,6 +182,26 @@ def project(projectName):
 
 # ---------------------------
 
+@app.route('/deleteProject/<string:projectName>')
+def deleteProject(projectName):
+    redirectUrl = '/dashboard'
+
+    if engine.isProjectOwner(projectName) == False:
+        flash('Deoarece nu sunteti proprietarul acestui proiect nu puteti efectua aceasta operatiune!', 'warning')
+        return redirect(redirectUrl)
+
+    path = os.path.join(os.getcwd(), app.config['BASE_PROJECTS_FOLDER_NAME'], projectName)
+    if engine.dirExists(path) == True:
+        shutil.rmtree(path, ignore_errors=True)
+    else:
+        flash('Proiectul nu exista sau nu a putut fi sters!', 'warning')
+        return redirect(redirectUrl)
+
+    flash('Proiectul a fost sters cu succes!', 'success')
+    return redirect(redirectUrl)
+
+# ---------------------------
+
 @app.route('/secureProject/<string:projectName>', methods=['GET', 'POST'])
 def secureProject(projectName):
     if engine.isProjectOwner(projectName) == True:
@@ -625,5 +645,5 @@ def deleteTest(projectName, trainingName, testName):
         flash('Testul nu exista sau nu a putut fi sters!', 'warning')
         return redirect(redirectUrl)
 
-    flash('Fisierul de configurare a fost sters cu succes!', 'success')
+    flash('Testul a fost sters cu succes!', 'success')
     return redirect(redirectUrl)

@@ -33,6 +33,8 @@
         <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#formAddTrainingFileModal"><i class="fa fa-plus" aria-hidden="true"></i> Adaugă fișier de configurare al modului de antrenament</button>
         <a href="{{ url_for('manageProjectDatasets', projectName = projectName) }}" class="btn btn-block btn-warning"><i class="fa fa-database" aria-hidden="true"></i> Gestionează seturile de date</a>
         <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#formAddNetworkTrainingModal"><i class="fa fa-cogs" aria-hidden="true"></i> Efectuează un antrenament nou</button>
+        <hr>
+        <a href="{{ url_for('deleteProject', projectName = projectName) }}" class="btn btn-block btn-danger"><i class="fa fa-times" aria-hidden="true"></i> Șterge proiectul</a>
         {% else %}
         <div class="alert alert-danger">
           <strong>ATENȚIE!</strong> În acest moment vizualizați acest proiect ca vizitator. Acest lucru înseamnă că nu puteți face modificări, doar puteți vizualiza activitatea proprietarului. Dacă sunteți proprietarul acestui proiect, vă rugăm să furnizați codul de acces setat la crearea proiectului prin apăsarea următorului buton:
